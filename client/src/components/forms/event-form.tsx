@@ -150,8 +150,9 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
     formData.append("endDate", endDate.toISOString());
     formData.append("maxParticipants", values.maxParticipants.toString());
     formData.append("price", values.price.toString());
-    formData.append("requireIdVerification", values.requireIdVerification.toString());
-    formData.append("location", values.location);
+    formData.append("currency", values.currency);
+    formData.append("requireIdVerification", values.requireIdVerification ? "true" : "false");
+    formData.append("location", values.location || "");
     formData.append("draftMode", values.draftMode.toString());
     
     if (values.offerId) {
@@ -373,6 +374,34 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                       <MapPin className="mr-2 h-5 w-5" /> 
                       <span>Google Maps will be integrated here</span>
                     </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem className="col-span-6 sm:col-span-3">
+                    <FormLabel>Currency</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="INR">Indian Rupee (INR)</SelectItem>
+                        <SelectItem value="USD">US Dollar (USD)</SelectItem>
+                        <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                        <SelectItem value="GBP">British Pound (GBP)</SelectItem>
+                        <SelectItem value="AUD">Australian Dollar (AUD)</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
