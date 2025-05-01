@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
+import { dbStorage } from "./storage-db";
 import { z } from "zod";
 import { insertBusinessPartnerSchema, insertEventSchema, insertOfferSchema } from "@shared/schema";
 import { format, subMonths, addDays } from "date-fns";
@@ -122,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating event for user ID:", userId);
       
       // Get business partner for the user
-      const businessPartner = await storage.getBusinessPartnerByUserId(userId);
+      const businessPartner = await dbStorage.getBusinessPartnerByUserId(userId);
       console.log("Found business partner:", businessPartner?.id);
       
       if (!businessPartner) {
@@ -158,8 +159,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const validatedData = insertEventSchema.parse(eventData);
         console.log("Validated data:", JSON.stringify(validatedData, null, 2));
         
-        // Create the event
-        const event = await storage.createEvent(validatedData);
+        // Create the event using database storage
+        const event = await dbStorage.createEvent(validatedData);
         console.log("Event created successfully:", JSON.stringify(event, null, 2));
         res.status(201).json(event);
       } catch (validationError) {
