@@ -326,8 +326,8 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                 render={({ field }) => (
                   <FormItem className="col-span-6 sm:col-span-3">
                     <FormLabel>Price (if any)</FormLabel>
-                    <FormControl>
-                      <div className="relative rounded-md shadow-sm">
+                    <div className="flex space-x-2">
+                      <div className="relative rounded-md shadow-sm flex-grow">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <span className="text-gray-500 sm:text-sm">
                             {form.watch("currency") === "INR" ? "₹" : 
@@ -337,22 +337,45 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                             form.watch("currency") === "AUD" ? "A$" : "₹"}
                           </span>
                         </div>
-                        <Input 
-                          {...field}
-                          type="number" 
-                          min="0" 
-                          step="0.01"
-                          placeholder="0.00"
-                          className="pl-7 pr-12"
-                          onChange={(e) => {
-                            field.onChange(parseFloat(e.target.value) || 0);
-                          }}
-                        />
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                          <span className="text-gray-500 sm:text-sm">{form.watch("currency")}</span>
-                        </div>
+                        <FormControl>
+                          <Input 
+                            {...field}
+                            type="number" 
+                            min="0" 
+                            placeholder="0.00"
+                            className="pl-7"
+                            onChange={(e) => {
+                              field.onChange(parseFloat(e.target.value) || 0);
+                            }}
+                          />
+                        </FormControl>
                       </div>
-                    </FormControl>
+                      <div className="w-24">
+                        <FormField
+                          control={form.control}
+                          name="currency"
+                          render={({ field: currencyField }) => (
+                            <Select
+                              onValueChange={currencyField.onChange}
+                              defaultValue={currencyField.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="INR" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="INR">INR</SelectItem>
+                                <SelectItem value="USD">USD</SelectItem>
+                                <SelectItem value="EUR">EUR</SelectItem>
+                                <SelectItem value="GBP">GBP</SelectItem>
+                                <SelectItem value="AUD">AUD</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -374,34 +397,6 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                       <MapPin className="mr-2 h-5 w-5" /> 
                       <span>Google Maps will be integrated here</span>
                     </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="currency"
-                render={({ field }) => (
-                  <FormItem className="col-span-6 sm:col-span-3">
-                    <FormLabel>Currency</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select currency" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="INR">Indian Rupee (INR)</SelectItem>
-                        <SelectItem value="USD">US Dollar (USD)</SelectItem>
-                        <SelectItem value="EUR">Euro (EUR)</SelectItem>
-                        <SelectItem value="GBP">British Pound (GBP)</SelectItem>
-                        <SelectItem value="AUD">Australian Dollar (AUD)</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
