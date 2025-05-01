@@ -183,17 +183,18 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
       // Prepare data object with strictly correctly typed values
       const eventData: Record<string, any> = {
         // Required fields
+        hostId: businessPartner?.id, // Ensure hostId is included
         name: values.name,
         startDate: new Date(values.startDateTime).toISOString(),
         endDate: new Date(values.endDateTime).toISOString(),
         
         // Optional fields with proper default values
-        description: values.description || null,
+        description: values.description || "",
         maxParticipants: typeof values.maxParticipants === 'number' ? values.maxParticipants : 50,
         price: typeof values.price === 'number' ? values.price : 0,
         currency: values.currency || "INR",
         requireIdVerification: Boolean(values.requireIdVerification),
-        location: values.location || null,
+        location: values.location || "",
         draftMode: Boolean(values.draftMode)
       };
       
@@ -228,9 +229,37 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
   };
 
   const saveDraft = () => {
-    const currentValues = form.getValues();
-    form.setValue("draftMode", true);
-    form.handleSubmit(onSubmit)();
+    try {
+      console.log("Saving draft...");
+      // Get current values and explicitly set draftMode to true
+      const currentValues = form.getValues();
+      
+      // Validate minimum required fields for a draft
+      if (!currentValues.name) {
+        toast({
+          title: "Validation Error",
+          description: "Event name is required, even for drafts",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Set draft mode to true
+      form.setValue("draftMode", true);
+      
+      // Log values before submitting
+      console.log("Draft values being submitted:", form.getValues());
+      
+      // Submit the form
+      form.handleSubmit(onSubmit)();
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem saving the draft",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
