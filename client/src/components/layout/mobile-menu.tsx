@@ -74,51 +74,51 @@ export default function MobileMenu() {
             <nav className="mt-5 px-2 space-y-1">
               <Link href="/">
                 <a 
-                  className={`sidebar-link ${location === '/' ? 'active' : ''}`}
+                  className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location === '/' ? 'bg-sidebar-accent' : ''}`}
                   onClick={closeMobileMenu}
                 >
                   <Home className="mr-4 h-5 w-5" />
-                  Dashboard
+                  <span>Dashboard</span>
                 </a>
               </Link>
               
               <Link href="/profile">
                 <a 
-                  className={`sidebar-link ${location === '/profile' ? 'active' : ''}`}
+                  className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location === '/profile' ? 'bg-sidebar-accent' : ''}`}
                   onClick={closeMobileMenu}
                 >
                   <User className="mr-4 h-5 w-5" />
-                  Profile
+                  <span>Profile</span>
                 </a>
               </Link>
               
               <Link href="/events">
                 <a 
-                  className={`sidebar-link ${location.startsWith('/events') ? 'active' : ''}`}
+                  className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location.startsWith('/events') ? 'bg-sidebar-accent' : ''}`}
                   onClick={closeMobileMenu}
                 >
                   <Calendar className="mr-4 h-5 w-5" />
-                  Events
+                  <span>Events</span>
                 </a>
               </Link>
               
               <Link href="/offers">
                 <a 
-                  className={`sidebar-link ${location.startsWith('/offers') ? 'active' : ''}`}
+                  className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location.startsWith('/offers') ? 'bg-sidebar-accent' : ''}`}
                   onClick={closeMobileMenu}
                 >
                   <Tag className="mr-4 h-5 w-5" />
-                  Offers
+                  <span>Offers</span>
                 </a>
               </Link>
               
               <Link href="/analytics">
                 <a 
-                  className={`sidebar-link ${location === '/analytics' ? 'active' : ''}`}
+                  className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location === '/analytics' ? 'bg-sidebar-accent' : ''}`}
                   onClick={closeMobileMenu}
                 >
                   <LineChart className="mr-4 h-5 w-5" />
-                  Analytics
+                  <span>Analytics</span>
                 </a>
               </Link>
             </nav>

@@ -36,37 +36,37 @@ export default function Sidebar() {
           <div className="flex-1 flex flex-col overflow-y-auto">
             <nav className="flex-1 px-2 py-4 space-y-1">
               <Link href="/">
-                <a className={`sidebar-link ${location === '/' ? 'active' : ''}`}>
+                <a className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location === '/' ? 'bg-sidebar-accent' : ''}`}>
                   <Home className="mr-3 h-5 w-5" />
-                  Dashboard
+                  <span>Dashboard</span>
                 </a>
               </Link>
               
               <Link href="/profile">
-                <a className={`sidebar-link ${location === '/profile' ? 'active' : ''}`}>
+                <a className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location === '/profile' ? 'bg-sidebar-accent' : ''}`}>
                   <User className="mr-3 h-5 w-5" />
-                  Profile
+                  <span>Profile</span>
                 </a>
               </Link>
               
               <Link href="/events">
-                <a className={`sidebar-link ${location.startsWith('/events') ? 'active' : ''}`}>
+                <a className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location.startsWith('/events') ? 'bg-sidebar-accent' : ''}`}>
                   <Calendar className="mr-3 h-5 w-5" />
-                  Events
+                  <span>Events</span>
                 </a>
               </Link>
               
               <Link href="/offers">
-                <a className={`sidebar-link ${location.startsWith('/offers') ? 'active' : ''}`}>
+                <a className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location.startsWith('/offers') ? 'bg-sidebar-accent' : ''}`}>
                   <Tag className="mr-3 h-5 w-5" />
-                  Offers
+                  <span>Offers</span>
                 </a>
               </Link>
               
               <Link href="/analytics">
-                <a className={`sidebar-link ${location === '/analytics' ? 'active' : ''}`}>
+                <a className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location === '/analytics' ? 'bg-sidebar-accent' : ''}`}>
                   <LineChart className="mr-3 h-5 w-5" />
-                  Analytics
+                  <span>Analytics</span>
                 </a>
               </Link>
             </nav>
