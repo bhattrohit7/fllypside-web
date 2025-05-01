@@ -19,6 +19,10 @@ import {
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import { subDays, isAfter, isBefore, addDays } from "date-fns";
+import { db } from "./db";
+import { eq, and, lt, gte, sql } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -594,4 +598,224 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { db } from "./db";
+import { eq, and, lt, gte, sql } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
+
+const PostgresSessionStore = connectPg(session);
+
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true 
+    });
+  }
+
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    console.log("Creating user with data:", JSON.stringify(user, null, 2));
+    const [newUser] = await db.insert(users).values(user).returning();
+    return newUser;
+  }
+
+  // Business partner methods
+  async getBusinessPartner(id: number): Promise<BusinessPartner | undefined> {
+    const [partner] = await db.select().from(businessPartners).where(eq(businessPartners.id, id));
+    return partner;
+  }
+
+  async getBusinessPartnerByUserId(userId: number): Promise<BusinessPartner | undefined> {
+    console.log("Looking for business partner with userId:", userId);
+    const partners = await db.select().from(businessPartners);
+    console.log("Current business partners:", partners.length);
+    
+    for (const bp of partners) {
+      console.log(`BP ID: ${bp.id}, UserID: ${bp.userId}, Name: ${bp.firstName} ${bp.lastName}`);
+    }
+
+    const [partner] = await db.select().from(businessPartners).where(eq(businessPartners.userId, userId));
+    if (partner) {
+      console.log("Found business partner:", partner.id, "for user", userId);
+    } else {
+      console.log("No business partner found for user", userId);
+    }
+    return partner;
+  }
+
+  async createBusinessPartner(data: InsertBusinessPartner): Promise<BusinessPartner> {
+    const [partner] = await db.insert(businessPartners).values(data).returning();
+    return partner;
+  }
+
+  async updateBusinessPartner(id: number, data: InsertBusinessPartner): Promise<BusinessPartner> {
+    const [partner] = await db
+      .update(businessPartners)
+      .set(data)
+      .where(eq(businessPartners.id, id))
+      .returning();
+    return partner;
+  }
+
+  // Event methods
+  async getEvent(id: number): Promise<Event | undefined> {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event;
+  }
+
+  async getEventsByBusinessPartnerId(businessPartnerId: number, status: string): Promise<Event[]> {
+    let query = db.select().from(events).where(eq(events.hostId, businessPartnerId));
+    
+    if (status === "upcoming") {
+      query = query.where(gte(events.startDate, new Date()));
+    } else if (status === "past") {
+      query = query.where(lt(events.endDate, new Date()));
+    } else if (status === "draft") {
+      query = query.where(eq(events.draftMode, true));
+    }
+    
+    return await query;
+  }
+
+  async createEvent(data: InsertEvent): Promise<Event> {
+    console.log("Creating event with data:", JSON.stringify(data, null, 2));
+    
+    try {
+      // Make sure we have the required fields with correct types
+      const eventData = {
+        ...data,
+        hostId: data.hostId,
+        name: data.name,
+        startDate: new Date(data.startDate),
+        endDate: new Date(data.endDate),
+        description: data.description ?? null,
+        bannerImage: data.bannerImage ?? null,
+        maxParticipants: data.maxParticipants ?? 50,
+        price: data.price ?? 0,
+        currency: data.currency ?? "INR",
+        requireIdVerification: data.requireIdVerification ?? false,
+        location: data.location ?? null,
+        draftMode: data.draftMode ?? false,
+      };
+      
+      console.log("Formatted event data for DB:", JSON.stringify(eventData, null, 2));
+      
+      const [event] = await db.insert(events).values(eventData).returning();
+      console.log("Event created successfully:", JSON.stringify(event, null, 2));
+      return event;
+    } catch (error) {
+      console.error("Error creating event in database:", error);
+      throw error;
+    }
+  }
+
+  async updateEvent(id: number, data: InsertEvent): Promise<Event> {
+    const [event] = await db
+      .update(events)
+      .set(data)
+      .where(eq(events.id, id))
+      .returning();
+    return event;
+  }
+
+  async deleteEvent(id: number): Promise<void> {
+    await db.delete(events).where(eq(events.id, id));
+  }
+
+  // Offer methods
+  async getOffer(id: number): Promise<Offer | undefined> {
+    const [offer] = await db.select().from(offers).where(eq(offers.id, id));
+    return offer;
+  }
+
+  async getOffersByBusinessPartnerId(businessPartnerId: number, status: string): Promise<Offer[]> {
+    const now = new Date();
+    let query = db.select().from(offers).where(eq(offers.businessPartnerId, businessPartnerId));
+    
+    if (status === "active") {
+      // Active offers: either no expiry date or expiry date in the future
+      query = query.where(
+        sql`(${offers.expiryDate} IS NULL OR ${offers.expiryDate} > ${now})`
+      );
+    } else if (status === "expired") {
+      // Expired offers: expiry date in the past
+      query = query.where(
+        sql`(${offers.expiryDate} IS NOT NULL AND ${offers.expiryDate} <= ${now})`
+      );
+    }
+    
+    return await query;
+  }
+
+  async createOffer(data: InsertOffer): Promise<Offer> {
+    const [offer] = await db.insert(offers).values(data).returning();
+    return offer;
+  }
+
+  async updateOffer(id: number, data: InsertOffer): Promise<Offer> {
+    const [offer] = await db
+      .update(offers)
+      .set(data)
+      .where(eq(offers.id, id))
+      .returning();
+    return offer;
+  }
+
+  async deleteOffer(id: number): Promise<void> {
+    await db.delete(offers).where(eq(offers.id, id));
+  }
+
+  async linkOfferToAllEvents(offerId: number, businessPartnerId: number): Promise<void> {
+    // First, get all events for the business partner
+    const partnerEvents = await this.getEventsByBusinessPartnerId(businessPartnerId, "all");
+    
+    // Delete any existing links for this offer
+    await db.delete(eventOffers).where(eq(eventOffers.offerId, offerId));
+    
+    // Create new links for all events
+    for (const event of partnerEvents) {
+      await db.insert(eventOffers).values({
+        eventId: event.id,
+        offerId
+      });
+    }
+  }
+
+  // Event participants
+  async getEventParticipants(eventId: number): Promise<any[]> {
+    // Get all participants for an event
+    const participants = await db
+      .select({
+        participant: businessPartners
+      })
+      .from(eventParticipants)
+      .innerJoin(
+        businessPartners,
+        eq(eventParticipants.businessPartnerId, businessPartners.id)
+      )
+      .where(eq(eventParticipants.eventId, eventId));
+    
+    return participants.map(p => p.participant);
+  }
+}
+
+// Switch from in-memory storage to database storage
+export const storage = new DatabaseStorage();
