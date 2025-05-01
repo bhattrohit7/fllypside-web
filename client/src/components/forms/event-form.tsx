@@ -136,38 +136,42 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
   const onSubmit = (values: EventFormValues) => {
     setIsSubmitting(true);
     
-    // Convert dates to proper format
-    const formData = new FormData();
-    formData.append("hostId", businessPartner?.id?.toString() || "");
-    formData.append("name", values.name);
-    formData.append("description", values.description || "");
-    
-    // Convert string dates to Date objects
-    const startDate = new Date(values.startDateTime);
-    const endDate = new Date(values.endDateTime);
-    
-    formData.append("startDate", startDate.toISOString());
-    formData.append("endDate", endDate.toISOString());
-    formData.append("maxParticipants", values.maxParticipants.toString());
-    formData.append("price", values.price.toString());
-    formData.append("currency", values.currency);
-    formData.append("requireIdVerification", values.requireIdVerification ? "true" : "false");
-    formData.append("location", values.location || "");
-    formData.append("draftMode", values.draftMode.toString());
+    // Prepare data object instead of FormData for better JSON handling
+    const eventData = {
+      hostId: businessPartner?.id,
+      name: values.name,
+      description: values.description || "",
+      
+      // Convert string dates to proper ISO strings
+      startDate: new Date(values.startDateTime).toISOString(),
+      endDate: new Date(values.endDateTime).toISOString(),
+      
+      maxParticipants: values.maxParticipants,
+      price: values.price,
+      currency: values.currency,
+      requireIdVerification: values.requireIdVerification,
+      location: values.location || "",
+      draftMode: values.draftMode,
+    };
     
     if (values.offerId) {
-      formData.append("offerId", values.offerId);
+      eventData.offerId = values.offerId;
     }
     
-    // Append banner image if available
+    // Handle banner image if available
+    // Note: For proper file upload, we'd need multipart form support 
+    // which would require server-side changes. For now, we'll just use
+    // a placeholder URL if an image was selected
     if (values.bannerImage && values.bannerImage.length > 0) {
-      formData.append("bannerImage", values.bannerImage[0]);
+      eventData.bannerImage = imagePreview || "https://placehold.co/600x400";
     }
+    
+    console.log("Submitting event data:", eventData);
     
     if (existingData?.id) {
-      updateEventMutation.mutate({ id: existingData.id, data: formData });
+      updateEventMutation.mutate({ id: existingData.id, data: eventData });
     } else {
-      createEventMutation.mutate(formData);
+      createEventMutation.mutate(eventData);
     }
   };
 
