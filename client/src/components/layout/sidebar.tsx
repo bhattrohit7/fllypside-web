@@ -36,37 +36,37 @@ export default function Sidebar() {
           <div className="flex-1 flex flex-col overflow-y-auto">
             <nav className="flex-1 px-2 py-4 space-y-1">
               <Link href="/">
-                <a className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location === '/' ? 'bg-sidebar-accent' : ''}`}>
+                <a className={`sidebar-link ${location === '/' ? 'active' : ''}`}>
                   <Home className="mr-3 h-5 w-5" />
-                  <span>Dashboard</span>
+                  Dashboard
                 </a>
               </Link>
               
               <Link href="/profile">
-                <a className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location === '/profile' ? 'bg-sidebar-accent' : ''}`}>
+                <a className={`sidebar-link ${location === '/profile' ? 'active' : ''}`}>
                   <User className="mr-3 h-5 w-5" />
-                  <span>Profile</span>
+                  Profile
                 </a>
               </Link>
               
               <Link href="/events">
-                <a className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location.startsWith('/events') ? 'bg-sidebar-accent' : ''}`}>
+                <a className={`sidebar-link ${location.startsWith('/events') ? 'active' : ''}`}>
                   <Calendar className="mr-3 h-5 w-5" />
-                  <span>Events</span>
+                  Events
                 </a>
               </Link>
               
               <Link href="/offers">
-                <a className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location.startsWith('/offers') ? 'bg-sidebar-accent' : ''}`}>
+                <a className={`sidebar-link ${location.startsWith('/offers') ? 'active' : ''}`}>
                   <Tag className="mr-3 h-5 w-5" />
-                  <span>Offers</span>
+                  Offers
                 </a>
               </Link>
               
               <Link href="/analytics">
-                <a className={`bg-sidebar-background text-white hover:bg-sidebar-accent px-3 py-2 rounded-md flex items-center ${location === '/analytics' ? 'bg-sidebar-accent' : ''}`}>
+                <a className={`sidebar-link ${location === '/analytics' ? 'active' : ''}`}>
                   <LineChart className="mr-3 h-5 w-5" />
-                  <span>Analytics</span>
+                  Analytics
                 </a>
               </Link>
             </nav>
