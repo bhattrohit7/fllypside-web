@@ -96,17 +96,17 @@ export const events = pgTable("events", {
 export const insertEventSchema = createInsertSchema(events)
   .omit({ id: true, createdAt: true, updatedAt: true })
   .extend({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
-    price: z.coerce.number().min(0),
-    maxParticipants: z.coerce.number().positive(),
-    description: z.string().optional().nullable(),
-    bannerImage: z.string().optional().nullable(),
-    location: z.string().optional().nullable(),
-    requireIdVerification: z.boolean().optional().default(false),
-    currency: z.enum(["INR", "USD", "EUR", "GBP", "AUD"]).optional().default("INR"),
-    draftMode: z.boolean().optional().default(false),
-    offerId: z.number().optional(),
+    startDate: z.coerce.date(), // Required
+    endDate: z.coerce.date(), // Required
+    price: z.coerce.number().min(0).default(0), // Optional, defaults to 0
+    maxParticipants: z.coerce.number().positive().default(50), // Optional, defaults to 50
+    description: z.string().optional().nullable(), // Optional
+    bannerImage: z.string().optional().nullable(), // Optional
+    location: z.string().optional().nullable(), // Optional - will integrate with Google Maps later
+    requireIdVerification: z.boolean().optional().default(false), // Optional
+    currency: z.enum(["INR", "USD", "EUR", "GBP", "AUD"]).optional().default("INR"), // Optional
+    draftMode: z.boolean().optional().default(false), // Optional
+    offerId: z.number().optional(), // Optional
   });
 
 // Event images table
