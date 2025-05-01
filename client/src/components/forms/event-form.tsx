@@ -79,8 +79,35 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
   const createEventMutation = useMutation({
     mutationFn: async (data: any) => {
       console.log("Sending event creation request with data:", data);
+      
+      // Format the data properly for the API
+      const formattedData = {
+        ...data,
+        maxParticipants: Number(data.maxParticipants),
+        price: Number(data.price),
+        requireIdVerification: Boolean(data.requireIdVerification),
+        draftMode: Boolean(data.draftMode)
+      };
+      
+      console.log("Formatted data for API:", formattedData);
+      
       try {
-        const res = await apiRequest("POST", "/api/events", data);
+        // Use apiRequest directly without try/catch (it will be caught by the mutation error handler)
+        const res = await fetch("/api/events", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formattedData),
+          credentials: "include"
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error("Error response from API:", errorData);
+          throw new Error(errorData.message || "Failed to create event");
+        }
+        
         const result = await res.json();
         console.log("Event creation response:", result);
         return result;
@@ -115,10 +142,45 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
 
   const updateEventMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: any }) => {
-      const res = await apiRequest("PUT", `/api/events/${id}`, data);
-      return res.json();
+      console.log("Updating event with id:", id, "and data:", data);
+      
+      // Format the data properly for the API
+      const formattedData = {
+        ...data,
+        maxParticipants: Number(data.maxParticipants),
+        price: Number(data.price),
+        requireIdVerification: Boolean(data.requireIdVerification),
+        draftMode: Boolean(data.draftMode)
+      };
+      
+      console.log("Formatted data for API:", formattedData);
+      
+      try {
+        const res = await fetch(`/api/events/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formattedData),
+          credentials: "include"
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error("Error response from API:", errorData);
+          throw new Error(errorData.message || "Failed to update event");
+        }
+        
+        const result = await res.json();
+        console.log("Event update response:", result);
+        return result;
+      } catch (error) {
+        console.error("Error during API request:", error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Event updated successfully:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       toast({
         title: "Event updated",
@@ -126,12 +188,17 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
       });
       onSuccess();
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Event update mutation error:", error);
       toast({
         title: "Failed to update event",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
+      setIsSubmitting(false);
+    },
+    onSettled: () => {
+      console.log("Event update mutation settled");
       setIsSubmitting(false);
     }
   });
@@ -430,8 +497,14 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                             placeholder="0.00"
                             className="pl-7"
                             onChange={(e) => {
-                              field.onChange(parseFloat(e.target.value) || 0);
+                              // Convert to number without leading zeros
+                              const rawValue = e.target.value;
+                              // Remove leading zeros but keep a single zero if it's the only digit
+                              const strippedValue = rawValue.replace(/^0+(?=\d)/, '');
+                              const numberValue = parseFloat(strippedValue) || 0;
+                              field.onChange(numberValue);
                             }}
+                            value={field.value}
                           />
                         </FormControl>
                       </div>
