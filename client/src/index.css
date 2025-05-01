@@ -75,6 +75,10 @@
     @apply border-border;
   }
 
+  html, body {
+    @apply h-full overflow-hidden;
+  }
+  
   body {
     @apply font-sans antialiased bg-gray-50 text-foreground;
   }

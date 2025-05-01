@@ -9,7 +9,7 @@ export default function CreateOfferPage() {
   const [, navigate] = useLocation();
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <MobileMenu />
       
       <div className="flex-1 flex overflow-hidden">
