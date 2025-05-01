@@ -74,9 +74,13 @@ export default function AuthPage() {
     defaultValues: {
       email: "",
       username: "",
+      firstName: "",
+      lastName: "",
       password: "",
       confirmPassword: "",
       contactNumber: "",
+      gstNumber: "",
+      pointOfContact: "",
       termsAgreement: false,
     },
   });
@@ -264,6 +268,78 @@ export default function AuthPage() {
                   )}
                 />
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={registerForm.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} autoComplete="given-name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={registerForm.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} autoComplete="family-name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={registerForm.control}
+                  name="contactNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="tel" autoComplete="tel" placeholder="10-digit mobile number" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={registerForm.control}
+                  name="gstNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>GST Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., 22AAAAA0000A1Z5" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={registerForm.control}
+                  name="pointOfContact"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Point of Contact</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Name of the contact person" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={registerForm.control}
                   name="password"
@@ -283,23 +359,9 @@ export default function AuthPage() {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm password</FormLabel>
+                      <FormLabel>Confirm Password</FormLabel>
                       <FormControl>
                         <Input {...field} type="password" autoComplete="new-password" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={registerForm.control}
-                  name="contactNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact number</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="tel" autoComplete="tel" placeholder="10-digit mobile number" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

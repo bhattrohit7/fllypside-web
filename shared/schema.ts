@@ -11,6 +11,8 @@ export const users = pgTable("users", {
   contactNumber: text("contact_number"),
   firstName: text("first_name"),
   lastName: text("last_name"),
+  gstNumber: text("gst_number"),
+  pointOfContact: text("point_of_contact"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -19,7 +21,11 @@ export const insertUserSchema = createInsertSchema(users)
   .extend({
     email: z.string().email("Invalid email format"),
     password: z.string().min(8, "Password must be at least 8 characters").regex(/[0-9]/, "Password must include a number").regex(/[^a-zA-Z0-9]/, "Password must include a symbol"),
-    contactNumber: z.string().regex(/^\d{10}$/, "Contact number must be 10 digits").optional(),
+    firstName: z.string().min(2, "First name is required").max(50),
+    lastName: z.string().min(2, "Last name is required").max(50),
+    contactNumber: z.string().regex(/^\d{10}$/, "Contact number must be 10 digits"),
+    gstNumber: z.string().regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, "Invalid GST number format").optional(),
+    pointOfContact: z.string().min(3, "Point of contact is required").max(100),
   });
 
 // Business partner profile table
