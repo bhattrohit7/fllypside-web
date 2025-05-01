@@ -11,13 +11,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProfilePage() {
-  const { user, businessPartner } = useAuth();
+  const { user, businessPartner, isLoading: authLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [createProfile, setCreateProfile] = useState(false);
   
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ["/api/profile"],
-    enabled: !!user,
-  });
+  // We'll only use the businessPartner from Auth context since it's already managed there
+  const isLoading = authLoading;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -67,7 +66,7 @@ export default function ProfilePage() {
                       <ProfileForm 
                         onCancel={() => setIsEditing(false)} 
                         onSuccess={() => setIsEditing(false)}
-                        existingData={profile}
+                        existingData={businessPartner}
                       />
                     </div>
                   ) : (
@@ -78,8 +77,8 @@ export default function ProfilePage() {
                           <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             {isLoading ? (
                               <Skeleton className="h-5 w-32" />
-                            ) : profile?.firstName && profile?.lastName ? (
-                              `${profile.firstName} ${profile.lastName}`
+                            ) : businessPartner?.firstName && businessPartner?.lastName ? (
+                              `${businessPartner.firstName} ${businessPartner.lastName}`
                             ) : (
                               "Not provided"
                             )}
@@ -91,7 +90,7 @@ export default function ProfilePage() {
                           <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             {isLoading ? (
                               <Skeleton className="h-5 w-32" />
-                            ) : profile?.contactNumber || "Not provided"}
+                            ) : businessPartner?.contactNumber || "Not provided"}
                           </dd>
                         </div>
                         
@@ -109,7 +108,7 @@ export default function ProfilePage() {
                           <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             {isLoading ? (
                               <Skeleton className="h-5 w-20" />
-                            ) : profile?.sex || "Not provided"}
+                            ) : businessPartner?.sex || "Not provided"}
                           </dd>
                         </div>
                         
@@ -118,7 +117,7 @@ export default function ProfilePage() {
                           <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             {isLoading ? (
                               <Skeleton className="h-5 w-32" />
-                            ) : profile?.dob ? formatDate(profile.dob) : "Not provided"}
+                            ) : businessPartner?.dob ? formatDate(businessPartner.dob) : "Not provided"}
                           </dd>
                         </div>
                         
@@ -129,8 +128,8 @@ export default function ProfilePage() {
                               <Skeleton className="h-5 w-40" />
                             ) : (
                               <div className="flex items-center">
-                                <span>{profile?.idNumber || "Not provided"}</span>
-                                {profile?.idVerified && (
+                                <span>{businessPartner?.idNumber || "Not provided"}</span>
+                                {businessPartner?.idVerified && (
                                   <Badge variant="outline" className="ml-2 bg-green-100 text-green-800 border-green-200">
                                     <CheckCircle className="h-3 w-3 mr-1" /> Verified
                                   </Badge>
