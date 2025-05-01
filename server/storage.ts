@@ -96,6 +96,9 @@ export class MemStorage implements IStorage {
     
     // Seed some interests
     this.seedInterests();
+    
+    // Create a demo account for testing
+    this.seedDemoAccount();
   }
 
   private seedInterests() {
@@ -116,6 +119,122 @@ export class MemStorage implements IStorage {
       const id = this.currentInterestId++;
       this.interests.set(id, { id, name });
     });
+  }
+
+  private async seedDemoAccount() {
+    // Create a demo user
+    const user: User = {
+      id: this.currentUserId++,
+      email: "demo@flypside.com",
+      username: "demo",
+      password: "$2b$10$I9RqrLT7Vkof3QbZdvM/4O8EkMT/X5HOYWFGgNHHZjxZlKxROp9Im", // password: "demo123"
+      createdAt: new Date()
+    };
+    this.users.set(user.id, user);
+
+    // Create a business partner profile for the user
+    const businessPartner: BusinessPartner = {
+      id: this.currentBusinessPartnerId++,
+      userId: user.id,
+      firstName: "Demo",
+      lastName: "User",
+      contactNumber: "+91 9876543210",
+      sex: "Male",
+      dob: "1990-01-01",
+      idNumber: "ABC123456",
+      idVerified: true,
+      isBusiness: true,
+      currentCity: "Mumbai",
+      relationshipStatus: "Single",
+      lookingFor: "serious",
+      info: "This is a demo account for testing the Flypside platform.",
+      socialInfo: "Follow us on social media @flypside",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.businessPartners.set(businessPartner.id, businessPartner);
+
+    // Add some interests to the business partner
+    ["Technology", "Business Networking", "Marketing"].forEach(interestName => {
+      const interest = Array.from(this.interests.values()).find(i => i.name === interestName);
+      if (interest) {
+        const key = `${businessPartner.id}_${interest.id}`;
+        this.businessPartnerInterests.set(key, {
+          businessPartnerId: businessPartner.id,
+          interestId: interest.id
+        });
+      }
+    });
+
+    // Create a few sample events
+    const events = [
+      {
+        name: "Tech Networking Mixer",
+        description: "An evening of networking with tech professionals from around the city.",
+        location: "Taj Hotel, Mumbai",
+        startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000), // 3 hours after start
+        maxParticipants: 50,
+        price: 500,
+        requireIdVerification: true,
+        hostId: businessPartner.id,
+        currency: "INR"
+      },
+      {
+        name: "Business Growth Workshop",
+        description: "Learn strategies to scale your business in 2025.",
+        location: "Grand Hyatt, Delhi",
+        startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+        endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 6 * 60 * 60 * 1000), // 6 hours after start
+        maxParticipants: 100,
+        price: 2000,
+        requireIdVerification: false,
+        hostId: businessPartner.id,
+        currency: "INR"
+      }
+    ];
+
+    events.forEach(eventData => {
+      const event: Event = {
+        id: this.currentEventId++,
+        ...eventData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      this.events.set(event.id, event);
+    });
+
+    // Create a couple of offers
+    const offers = [
+      {
+        text: "Early Bird Discount",
+        percentage: 15,
+        startDate: new Date(),
+        expiryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+        businessPartnerId: businessPartner.id
+      },
+      {
+        text: "Premium Partner Offer",
+        percentage: 25,
+        startDate: new Date(),
+        expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        businessPartnerId: businessPartner.id
+      }
+    ];
+
+    offers.forEach(offerData => {
+      const offer: Offer = {
+        id: this.currentOfferId++,
+        ...offerData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      this.offers.set(offer.id, offer);
+    });
+
+    console.log("Demo account created:");
+    console.log("Email: demo@flypside.com");
+    console.log("Password: demo123");
   }
 
   // User methods
