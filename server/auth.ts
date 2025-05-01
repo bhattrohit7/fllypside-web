@@ -60,10 +60,12 @@ export function setupAuth(app: Express) {
           return done(null, false, { message: "Invalid email or password" });
         }
         
-        // Special case for demo account with pre-hashed password
+        // Special case for demo account
         if (email === "demo@flypside.com" && password === "demo123") {
+          console.log("Demo account login successful");
           return done(null, user);
         } else if (!(await comparePasswords(password, user.password))) {
+          console.log("Password verification failed");
           return done(null, false, { message: "Invalid email or password" });
         }
         
