@@ -26,13 +26,19 @@ import { Loader2, Upload, MapPin } from "lucide-react";
 import { format } from "date-fns";
 
 // Extend the event schema for the form
-const eventFormSchema = insertEventSchema.extend({
-  bannerImage: z.instanceof(FileList).optional(),
-  draftMode: z.boolean().default(false),
+const eventFormSchema = z.object({
+  name: z.string().min(1, "Event name is required"),
+  description: z.string().optional(),
   startDateTime: z.string().min(1, "Start date and time is required"),
   endDateTime: z.string().min(1, "End date and time is required"),
-  offerId: z.string().optional(),
+  maxParticipants: z.coerce.number().positive().default(50),
+  price: z.coerce.number().min(0).default(0),
+  location: z.string().optional(),
+  requireIdVerification: z.boolean().optional().default(false),
   currency: z.enum(["INR", "USD", "EUR", "GBP", "AUD"]).default("INR"),
+  offerId: z.string().optional(),
+  draftMode: z.boolean().default(false),
+  bannerImage: z.any().optional(),
 });
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
@@ -80,41 +86,12 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
     mutationFn: async (data: any) => {
       console.log("Sending event creation request with data:", data);
       
-      // Format the data properly for the API
-      const formattedData = {
-        ...data,
-        maxParticipants: Number(data.maxParticipants),
-        price: Number(data.price),
-        requireIdVerification: Boolean(data.requireIdVerification),
-        draftMode: Boolean(data.draftMode)
-      };
-      
-      console.log("Formatted data for API:", formattedData);
-      
-      try {
-        // Use apiRequest directly without try/catch (it will be caught by the mutation error handler)
-        const res = await fetch("/api/events", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(formattedData),
-          credentials: "include"
-        });
-        
-        if (!res.ok) {
-          const errorData = await res.json();
-          console.error("Error response from API:", errorData);
-          throw new Error(errorData.message || "Failed to create event");
-        }
-        
-        const result = await res.json();
-        console.log("Event creation response:", result);
-        return result;
-      } catch (error) {
-        console.error("Error during API request:", error);
-        throw error;
+      const response = await apiRequest("POST", "/api/events", data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create event");
       }
+      return response.json();
     },
     onSuccess: (data) => {
       console.log("Event created successfully:", data);
@@ -144,40 +121,12 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
     mutationFn: async ({ id, data }: { id: number, data: any }) => {
       console.log("Updating event with id:", id, "and data:", data);
       
-      // Format the data properly for the API
-      const formattedData = {
-        ...data,
-        maxParticipants: Number(data.maxParticipants),
-        price: Number(data.price),
-        requireIdVerification: Boolean(data.requireIdVerification),
-        draftMode: Boolean(data.draftMode)
-      };
-      
-      console.log("Formatted data for API:", formattedData);
-      
-      try {
-        const res = await fetch(`/api/events/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(formattedData),
-          credentials: "include"
-        });
-        
-        if (!res.ok) {
-          const errorData = await res.json();
-          console.error("Error response from API:", errorData);
-          throw new Error(errorData.message || "Failed to update event");
-        }
-        
-        const result = await res.json();
-        console.log("Event update response:", result);
-        return result;
-      } catch (error) {
-        console.error("Error during API request:", error);
-        throw error;
+      const response = await apiRequest("PUT", `/api/events/${id}`, data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update event");
       }
+      return response.json();
     },
     onSuccess: (data) => {
       console.log("Event updated successfully:", data);
@@ -219,69 +168,38 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
     setIsSubmitting(true);
     
     try {
-      // Validate form before proceeding
-      if (!values.startDateTime) {
-        console.error("Start date is required");
-        toast({
-          title: "Validation Error",
-          description: "Start date and time is required",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-      
-      if (!values.endDateTime) {
-        console.error("End date is required");
-        toast({
-          title: "Validation Error",
-          description: "End date and time is required",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      console.log("Dates from form:", {
-        start: values.startDateTime,
-        end: values.endDateTime
-      });
-      
-      // Prepare data object with strictly correctly typed values
-      const eventData: Record<string, any> = {
-        // Required fields
-        hostId: businessPartner?.id, // Ensure hostId is included
+      // Create a clean data object for submission
+      const eventData = {
+        hostId: businessPartner?.id,
         name: values.name,
+        description: values.description || "",
         startDate: new Date(values.startDateTime).toISOString(),
         endDate: new Date(values.endDateTime).toISOString(),
-        
-        // Optional fields with proper default values
-        description: values.description || "",
-        maxParticipants: typeof values.maxParticipants === 'number' ? values.maxParticipants : 50,
-        price: typeof values.price === 'number' ? values.price : 0,
-        currency: values.currency || "INR",
+        maxParticipants: Number(values.maxParticipants),
+        price: Number(values.price),
+        currency: values.currency,
         requireIdVerification: Boolean(values.requireIdVerification),
         location: values.location || "",
         draftMode: Boolean(values.draftMode)
       };
       
-      // Handle optional fields
-      if (values.offerId && values.offerId !== '') {
-        eventData.offerId = parseInt(values.offerId, 10);
-      }
-      
-      // Handle banner image if available
-      if (values.bannerImage && values.bannerImage.length > 0) {
+      // Add banner image if available
+      if (imagePreview) {
         eventData.bannerImage = imagePreview;
       }
       
-      console.log("Submitting event data:", JSON.stringify(eventData, null, 2));
+      // Add offer ID if selected
+      if (values.offerId && values.offerId !== '') {
+        eventData.offerId = Number(values.offerId);
+      }
+      
+      console.log("Submitting event data:", eventData);
       
       if (existingData?.id) {
         console.log("Updating existing event:", existingData.id);
         updateEventMutation.mutate({ id: existingData.id, data: eventData });
       } else {
-        console.log("Creating new event with data:", eventData);
+        console.log("Creating new event");
         createEventMutation.mutate(eventData);
       }
     } catch (error) {
@@ -298,7 +216,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
   const saveDraft = () => {
     try {
       console.log("Saving draft...");
-      // Get current values and explicitly set draftMode to true
+      // Get current values 
       const currentValues = form.getValues();
       
       // Validate minimum required fields for a draft
@@ -311,14 +229,37 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
         return;
       }
       
-      // Set draft mode to true
+      // Set draftMode to true and trigger submission
       form.setValue("draftMode", true);
       
-      // Log values before submitting
-      console.log("Draft values being submitted:", form.getValues());
+      // Create the event data object directly
+      const eventData = {
+        hostId: businessPartner?.id,
+        name: currentValues.name,
+        description: currentValues.description || "",
+        startDate: currentValues.startDateTime ? new Date(currentValues.startDateTime).toISOString() : new Date().toISOString(),
+        endDate: currentValues.endDateTime ? new Date(currentValues.endDateTime).toISOString() : new Date(Date.now() + 86400000).toISOString(),
+        maxParticipants: Number(currentValues.maxParticipants || 50),
+        price: Number(currentValues.price || 0),
+        currency: currentValues.currency || "INR",
+        requireIdVerification: Boolean(currentValues.requireIdVerification),
+        location: currentValues.location || "",
+        draftMode: true  // Always true for drafts
+      };
       
-      // Submit the form
-      form.handleSubmit(onSubmit)();
+      // Add banner image if available
+      if (imagePreview) {
+        eventData.bannerImage = imagePreview;
+      }
+      
+      console.log("Draft data being submitted:", eventData);
+      
+      // Submit directly to the mutation
+      if (existingData?.id) {
+        updateEventMutation.mutate({ id: existingData.id, data: eventData });
+      } else {
+        createEventMutation.mutate(eventData);
+      }
     } catch (error) {
       console.error("Error saving draft:", error);
       toast({
