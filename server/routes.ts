@@ -123,51 +123,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating event for user ID:", userId);
       
       // Get business partner for the user
-      const businessPartner = await dbStorage.getBusinessPartnerByUserId(userId);
+      const businessPartner = await storage.getBusinessPartnerByUserId(userId);
       console.log("Found business partner:", businessPartner?.id);
       
       if (!businessPartner) {
         return res.status(400).json({ message: "Business partner profile not found" });
       }
       
-      // Set host ID to the business partner ID
-      req.body.hostId = businessPartner.id;
-      
       // Log received data for debugging
       console.log("Received event data:", JSON.stringify(req.body, null, 2));
+      
+      // Convert date strings from form to proper dates
+      let startDate, endDate;
+      try {
+        if (req.body.startDate) {
+          startDate = new Date(req.body.startDate);
+        } else if (req.body.startDateTime) {
+          startDate = new Date(req.body.startDateTime);
+        } else {
+          throw new Error("Start date is required");
+        }
+        
+        if (req.body.endDate) {
+          endDate = new Date(req.body.endDate);
+        } else if (req.body.endDateTime) {
+          endDate = new Date(req.body.endDateTime);
+        } else {
+          throw new Error("End date is required");
+        }
+      } catch (dateError) {
+        console.error("Date parsing error:", dateError);
+        return res.status(400).json({ message: "Invalid date format" });
+      }
       
       // Prepare data for validation
       const eventData = {
         hostId: businessPartner.id,
         name: req.body.name || "Untitled Event",
-        startDate: new Date(req.body.startDate),
-        endDate: new Date(req.body.endDate),
+        startDate,
+        endDate,
         description: req.body.description || null,
-        price: req.body.price !== undefined ? parseFloat(req.body.price) : 0,
-        maxParticipants: req.body.maxParticipants !== undefined ? parseInt(req.body.maxParticipants, 10) : 50,
+        price: typeof req.body.price === 'number' ? req.body.price : 0,
+        maxParticipants: typeof req.body.maxParticipants === 'number' ? req.body.maxParticipants : 50,
         location: req.body.location || null,
         currency: req.body.currency || "INR",
-        requireIdVerification: req.body.requireIdVerification === true || req.body.requireIdVerification === "true",
-        draftMode: req.body.draftMode === true || req.body.draftMode === "true",
+        requireIdVerification: req.body.requireIdVerification === true,
+        draftMode: req.body.draftMode === true,
         bannerImage: req.body.bannerImage || null
       };
       
-      console.log("Cleaned event data:", JSON.stringify(eventData, null, 2));
+      console.log("Processed event data:", JSON.stringify(eventData, null, 2));
       
       try {
         // Validate the data against the schema
         const validatedData = insertEventSchema.parse(eventData);
         console.log("Validated data:", JSON.stringify(validatedData, null, 2));
         
-        // Create the event using database storage
-        const event = await dbStorage.createEvent(validatedData);
+        // Create the event
+        const event = await storage.createEvent(validatedData);
         console.log("Event created successfully:", JSON.stringify(event, null, 2));
-        res.status(201).json(event);
+        
+        // Return the created event with success status
+        res.status(201).json({
+          ...event,
+          message: "Event created successfully"
+        });
       } catch (validationError) {
         console.error("Validation error:", validationError);
         if (validationError instanceof z.ZodError) {
           return res.status(400).json({ 
-            message: validationError.errors[0].message,
+            message: "Validation failed: " + validationError.errors[0].message,
             errors: validationError.errors,
             path: validationError.errors[0].path.join('.')
           });
@@ -176,7 +201,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Event creation error:", error);
-      res.status(500).json({ message: "Failed to create event", error: String(error) });
+      res.status(500).json({ 
+        message: "Failed to create event", 
+        error: String(error)
+      });
     }
   });
   
@@ -198,38 +226,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Not authorized to update this event" });
       }
       
-      // Set host ID to the business partner ID
-      req.body.hostId = businessPartner.id;
-      
       // Log received data for debugging
-      console.log("Received event update data:", req.body);
+      console.log("Received event update data:", JSON.stringify(req.body, null, 2));
       
-      // Parse any numeric fields
-      if (typeof req.body.maxParticipants === 'string') {
-        req.body.maxParticipants = parseInt(req.body.maxParticipants, 10);
+      // Convert date strings from form to proper dates
+      let startDate, endDate;
+      try {
+        if (req.body.startDate) {
+          startDate = new Date(req.body.startDate);
+        } else if (req.body.startDateTime) {
+          startDate = new Date(req.body.startDateTime);
+        } else {
+          throw new Error("Start date is required");
+        }
+        
+        if (req.body.endDate) {
+          endDate = new Date(req.body.endDate);
+        } else if (req.body.endDateTime) {
+          endDate = new Date(req.body.endDateTime);
+        } else {
+          throw new Error("End date is required");
+        }
+      } catch (dateError) {
+        console.error("Date parsing error:", dateError);
+        return res.status(400).json({ message: "Invalid date format" });
       }
       
-      if (typeof req.body.price === 'string') {
-        req.body.price = parseFloat(req.body.price);
+      // Prepare data for validation
+      const eventData = {
+        hostId: businessPartner.id,
+        name: req.body.name || existingEvent.name,
+        startDate,
+        endDate,
+        description: req.body.description || existingEvent.description,
+        price: typeof req.body.price === 'number' ? req.body.price : existingEvent.price,
+        maxParticipants: typeof req.body.maxParticipants === 'number' ? req.body.maxParticipants : existingEvent.maxParticipants,
+        location: req.body.location || existingEvent.location,
+        currency: req.body.currency || existingEvent.currency,
+        requireIdVerification: req.body.requireIdVerification === true,
+        draftMode: req.body.draftMode === true,
+        bannerImage: req.body.bannerImage || existingEvent.bannerImage
+      };
+      
+      console.log("Processed event update data:", JSON.stringify(eventData, null, 2));
+      
+      try {
+        // Validate the data against the schema
+        const validatedData = insertEventSchema.parse(eventData);
+        console.log("Validated data for update:", JSON.stringify(validatedData, null, 2));
+        
+        // Update the event
+        const event = await storage.updateEvent(eventId, validatedData);
+        console.log("Event updated successfully:", JSON.stringify(event, null, 2));
+        
+        // Return the updated event with success status
+        res.status(200).json({
+          ...event,
+          message: "Event updated successfully"
+        });
+      } catch (validationError) {
+        console.error("Validation error:", validationError);
+        if (validationError instanceof z.ZodError) {
+          return res.status(400).json({ 
+            message: "Validation failed: " + validationError.errors[0].message,
+            errors: validationError.errors,
+            path: validationError.errors[0].path.join('.')
+          });
+        }
+        throw validationError; // Re-throw if it's not a ZodError
       }
-      
-      // Convert requireIdVerification from string to boolean if needed
-      if (req.body.requireIdVerification === 'true') {
-        req.body.requireIdVerification = true;
-      } else if (req.body.requireIdVerification === 'false') {
-        req.body.requireIdVerification = false;
-      }
-      
-      const validatedData = insertEventSchema.parse(req.body);
-      const updatedEvent = await storage.updateEvent(eventId, validatedData);
-      
-      res.json(updatedEvent);
     } catch (error) {
       console.error("Event update error:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.errors[0].message });
-      }
-      res.status(500).json({ message: "Failed to update event" });
+      res.status(500).json({ 
+        message: "Failed to update event", 
+        error: String(error)
+      });
     }
   });
   

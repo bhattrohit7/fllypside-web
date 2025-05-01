@@ -490,21 +490,25 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                           </span>
                         </div>
                         <FormControl>
-                          <Input 
-                            {...field}
-                            type="number" 
-                            min="0" 
+                          <input 
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-7"
+                            type="text" 
                             placeholder="0.00"
-                            className="pl-7"
+                            value={field.value === 0 ? "" : field.value}
                             onChange={(e) => {
-                              // Convert to number without leading zeros
-                              const rawValue = e.target.value;
-                              // Remove leading zeros but keep a single zero if it's the only digit
-                              const strippedValue = rawValue.replace(/^0+(?=\d)/, '');
-                              const numberValue = parseFloat(strippedValue) || 0;
+                              // Only allow numbers and decimal points
+                              const value = e.target.value.replace(/[^0-9.]/g, "");
+                              
+                              // Ensure only one decimal point
+                              const parts = value.split(".");
+                              const formattedValue = parts.length > 2 
+                                ? `${parts[0]}.${parts.slice(1).join("")}`
+                                : value;
+                                
+                              // Convert to number or 0 if empty
+                              const numberValue = formattedValue === "" ? 0 : parseFloat(formattedValue);
                               field.onChange(numberValue);
                             }}
-                            value={field.value}
                           />
                         </FormControl>
                       </div>
