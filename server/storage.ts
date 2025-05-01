@@ -128,6 +128,11 @@ export class MemStorage implements IStorage {
       email: "demo@flypside.com",
       username: "demo",
       password: "$2b$10$I9RqrLT7Vkof3QbZdvM/4O8EkMT/X5HOYWFGgNHHZjxZlKxROp9Im", // password: "demo123"
+      contactNumber: null,
+      firstName: null,
+      lastName: null,
+      gstNumber: null,
+      pointOfContact: null,
       createdAt: new Date()
     };
     this.users.set(user.id, user);
