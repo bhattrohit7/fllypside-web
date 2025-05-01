@@ -77,7 +77,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
   });
 
   const createEventMutation = useMutation({
-    mutationFn: async (data: FormData) => {
+    mutationFn: async (data: any) => {
       const res = await apiRequest("POST", "/api/events", data);
       return res.json();
     },
@@ -100,7 +100,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
   });
 
   const updateEventMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: FormData }) => {
+    mutationFn: async ({ id, data }: { id: number, data: any }) => {
       const res = await apiRequest("PUT", `/api/events/${id}`, data);
       return res.json();
     },

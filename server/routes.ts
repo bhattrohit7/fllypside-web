@@ -183,11 +183,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Set host ID to the business partner ID
       req.body.hostId = businessPartner.id;
       
+      // Log received data for debugging
+      console.log("Received event update data:", req.body);
+      
+      // Parse any numeric fields
+      if (typeof req.body.maxParticipants === 'string') {
+        req.body.maxParticipants = parseInt(req.body.maxParticipants, 10);
+      }
+      
+      if (typeof req.body.price === 'string') {
+        req.body.price = parseFloat(req.body.price);
+      }
+      
+      // Convert requireIdVerification from string to boolean if needed
+      if (req.body.requireIdVerification === 'true') {
+        req.body.requireIdVerification = true;
+      } else if (req.body.requireIdVerification === 'false') {
+        req.body.requireIdVerification = false;
+      }
+      
       const validatedData = insertEventSchema.parse(req.body);
       const updatedEvent = await storage.updateEvent(eventId, validatedData);
       
       res.json(updatedEvent);
     } catch (error) {
+      console.error("Event update error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0].message });
       }
