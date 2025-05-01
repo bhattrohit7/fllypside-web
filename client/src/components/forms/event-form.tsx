@@ -134,44 +134,85 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
   };
 
   const onSubmit = (values: EventFormValues) => {
+    console.log("Form submission started with values:", values);
     setIsSubmitting(true);
     
-    // Prepare data object instead of FormData for better JSON handling
-    const eventData = {
-      hostId: businessPartner?.id,
-      name: values.name,
-      description: values.description || "",
+    try {
+      // Validate form before proceeding
+      if (!values.startDateTime) {
+        console.error("Start date is required");
+        toast({
+          title: "Validation Error",
+          description: "Start date and time is required",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
       
-      // Convert string dates to proper ISO strings
-      startDate: new Date(values.startDateTime).toISOString(),
-      endDate: new Date(values.endDateTime).toISOString(),
+      if (!values.endDateTime) {
+        console.error("End date is required");
+        toast({
+          title: "Validation Error",
+          description: "End date and time is required",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log("Dates from form:", {
+        start: values.startDateTime,
+        end: values.endDateTime
+      });
       
-      maxParticipants: values.maxParticipants,
-      price: values.price,
-      currency: values.currency,
-      requireIdVerification: values.requireIdVerification,
-      location: values.location || "",
-      draftMode: values.draftMode,
-    };
-    
-    if (values.offerId) {
-      eventData.offerId = values.offerId;
-    }
-    
-    // Handle banner image if available
-    // Note: For proper file upload, we'd need multipart form support 
-    // which would require server-side changes. For now, we'll just use
-    // a placeholder URL if an image was selected
-    if (values.bannerImage && values.bannerImage.length > 0) {
-      eventData.bannerImage = imagePreview || "https://placehold.co/600x400";
-    }
-    
-    console.log("Submitting event data:", eventData);
-    
-    if (existingData?.id) {
-      updateEventMutation.mutate({ id: existingData.id, data: eventData });
-    } else {
-      createEventMutation.mutate(eventData);
+      // Prepare data object instead of FormData for better JSON handling
+      const eventData = {
+        hostId: businessPartner?.id,
+        name: values.name,
+        description: values.description || "",
+        
+        // Convert string dates to proper ISO strings
+        startDate: new Date(values.startDateTime).toISOString(),
+        endDate: new Date(values.endDateTime).toISOString(),
+        
+        maxParticipants: values.maxParticipants,
+        price: values.price,
+        currency: values.currency,
+        requireIdVerification: values.requireIdVerification,
+        location: values.location || "",
+        draftMode: values.draftMode,
+      };
+      
+      if (values.offerId) {
+        eventData.offerId = values.offerId;
+      }
+      
+      // Handle banner image if available
+      // Note: For proper file upload, we'd need multipart form support 
+      // which would require server-side changes. For now, we'll just use
+      // a placeholder URL if an image was selected
+      if (values.bannerImage && values.bannerImage.length > 0) {
+        eventData.bannerImage = imagePreview || "https://placehold.co/600x400";
+      }
+      
+      console.log("Submitting event data:", eventData);
+      
+      if (existingData?.id) {
+        console.log("Updating existing event:", existingData.id);
+        updateEventMutation.mutate({ id: existingData.id, data: eventData });
+      } else {
+        console.log("Creating new event with data:", eventData);
+        createEventMutation.mutate(eventData);
+      }
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem submitting the form",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
     }
   };
 

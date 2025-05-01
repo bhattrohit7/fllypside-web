@@ -98,6 +98,11 @@ export const insertEventSchema = createInsertSchema(events)
     endDate: z.coerce.date(),
     price: z.coerce.number().min(0),
     maxParticipants: z.coerce.number().positive(),
+    description: z.string().optional().nullable(),
+    bannerImage: z.string().optional().nullable(),
+    location: z.string().optional().nullable(),
+    requireIdVerification: z.boolean().optional().default(false),
+    currency: z.enum(["INR", "USD", "EUR", "GBP", "AUD"]).optional().default("INR"),
   });
 
 // Event images table

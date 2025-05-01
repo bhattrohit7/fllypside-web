@@ -119,9 +119,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/events", async (req, res) => {
     try {
       const userId = req.user!.id;
+      console.log("Creating event for user ID:", userId);
       
       // Get business partner for the user
       const businessPartner = await storage.getBusinessPartnerByUserId(userId);
+      console.log("Found business partner:", businessPartner?.id);
       
       if (!businessPartner) {
         return res.status(400).json({ message: "Business partner profile not found" });
@@ -149,15 +151,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.body.requireIdVerification = false;
       }
       
-      const validatedData = insertEventSchema.parse(req.body);
-      const event = await storage.createEvent(validatedData);
+      // Ensure bannerImage has a default value
+      if (!req.body.bannerImage) {
+        req.body.bannerImage = "https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
+      }
       
-      res.status(201).json(event);
+      try {
+        const validatedData = insertEventSchema.parse(req.body);
+        console.log("Validated data:", validatedData);
+        const event = await storage.createEvent(validatedData);
+        console.log("Event created successfully:", event);
+        res.status(201).json(event);
+      } catch (validationError) {
+        console.error("Validation error:", validationError);
+        if (validationError instanceof z.ZodError) {
+          return res.status(400).json({ 
+            message: validationError.errors[0].message,
+            errors: validationError.errors,
+            path: validationError.errors[0].path.join('.')
+          });
+        }
+        throw validationError; // Re-throw if it's not a ZodError
+      }
     } catch (error) {
       console.error("Event creation error:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.errors[0].message });
-      }
       res.status(500).json({ message: "Failed to create event" });
     }
   });

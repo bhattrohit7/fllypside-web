@@ -434,11 +434,25 @@ export class MemStorage implements IStorage {
   }
 
   async createEvent(data: InsertEvent): Promise<Event> {
+    console.log("Creating event with data:", JSON.stringify(data, null, 2));
+    
     const id = this.currentEventId++;
     const createdAt = new Date();
     const updatedAt = new Date();
     
-    const event: Event = { ...data, id, createdAt, updatedAt };
+    // Make sure optional fields have default values
+    const eventData = {
+      ...data,
+      description: data.description || null,
+      bannerImage: data.bannerImage || null,
+      location: data.location || null,
+      requireIdVerification: data.requireIdVerification ?? false,
+      price: data.price ?? 0,
+    };
+    
+    const event: Event = { ...eventData, id, createdAt, updatedAt };
+    console.log("Final event object:", JSON.stringify(event, null, 2));
+    
     this.events.set(id, event);
     
     return event;
