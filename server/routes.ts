@@ -133,34 +133,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.body.hostId = businessPartner.id;
       
       // Log received data for debugging
-      console.log("Received event data:", req.body);
+      console.log("Received event data:", JSON.stringify(req.body, null, 2));
       
-      // Parse any numeric fields
-      if (typeof req.body.maxParticipants === 'string') {
-        req.body.maxParticipants = parseInt(req.body.maxParticipants, 10);
-      }
+      // Prepare data for validation
+      const eventData = {
+        hostId: businessPartner.id,
+        name: req.body.name || "Untitled Event",
+        startDate: new Date(req.body.startDate),
+        endDate: new Date(req.body.endDate),
+        description: req.body.description || null,
+        price: req.body.price !== undefined ? parseFloat(req.body.price) : 0,
+        maxParticipants: req.body.maxParticipants !== undefined ? parseInt(req.body.maxParticipants, 10) : 50,
+        location: req.body.location || null,
+        currency: req.body.currency || "INR",
+        requireIdVerification: req.body.requireIdVerification === true || req.body.requireIdVerification === "true",
+        draftMode: req.body.draftMode === true || req.body.draftMode === "true",
+        bannerImage: req.body.bannerImage || null
+      };
       
-      if (typeof req.body.price === 'string') {
-        req.body.price = parseFloat(req.body.price);
-      }
-      
-      // Convert requireIdVerification from string to boolean if needed
-      if (req.body.requireIdVerification === 'true') {
-        req.body.requireIdVerification = true;
-      } else if (req.body.requireIdVerification === 'false') {
-        req.body.requireIdVerification = false;
-      }
-      
-      // Ensure bannerImage has a default value
-      if (!req.body.bannerImage) {
-        req.body.bannerImage = "https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
-      }
+      console.log("Cleaned event data:", JSON.stringify(eventData, null, 2));
       
       try {
-        const validatedData = insertEventSchema.parse(req.body);
-        console.log("Validated data:", validatedData);
+        // Validate the data against the schema
+        const validatedData = insertEventSchema.parse(eventData);
+        console.log("Validated data:", JSON.stringify(validatedData, null, 2));
+        
+        // Create the event
         const event = await storage.createEvent(validatedData);
-        console.log("Event created successfully:", event);
+        console.log("Event created successfully:", JSON.stringify(event, null, 2));
         res.status(201).json(event);
       } catch (validationError) {
         console.error("Validation error:", validationError);
@@ -175,7 +175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Event creation error:", error);
-      res.status(500).json({ message: "Failed to create event" });
+      res.status(500).json({ message: "Failed to create event", error: String(error) });
     }
   });
   
