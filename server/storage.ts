@@ -122,6 +122,8 @@ export class MemStorage implements IStorage {
   }
 
   private async seedDemoAccount() {
+    console.log("Creating demo account...");
+    
     // Create a demo user
     const user: User = {
       id: this.currentUserId++,
@@ -136,6 +138,7 @@ export class MemStorage implements IStorage {
       createdAt: new Date()
     };
     this.users.set(user.id, user);
+    console.log(`Demo user created with ID: ${user.id}`);
 
     // Create a business partner profile for the user
     const businessPartner: BusinessPartner = {
@@ -158,6 +161,7 @@ export class MemStorage implements IStorage {
       updatedAt: new Date()
     };
     this.businessPartners.set(businessPartner.id, businessPartner);
+    console.log(`Demo business partner created with ID: ${businessPartner.id} for user ID: ${user.id}`);
 
     // Add some interests to the business partner
     ["Technology", "Business Networking", "Marketing"].forEach(interestName => {
@@ -273,9 +277,25 @@ export class MemStorage implements IStorage {
   }
 
   async getBusinessPartnerByUserId(userId: number): Promise<BusinessPartner | undefined> {
-    return Array.from(this.businessPartners.values()).find(
-      (bp) => bp.userId === userId,
+    console.log(`Looking for business partner with userId: ${userId}`);
+    
+    // Debug info
+    console.log(`Current business partners: ${this.businessPartners.size}`);
+    this.businessPartners.forEach((bp, id) => {
+      console.log(`BP ID: ${id}, UserID: ${bp.userId}, Name: ${bp.firstName} ${bp.lastName}`);
+    });
+    
+    const partner = Array.from(this.businessPartners.values()).find(
+      (bp) => bp.userId === userId
     );
+    
+    if (partner) {
+      console.log(`Found business partner: ${partner.id} for user ${userId}`);
+    } else {
+      console.log(`No business partner found for user ${userId}`);
+    }
+    
+    return partner;
   }
 
   async createBusinessPartner(data: InsertBusinessPartner): Promise<BusinessPartner> {
