@@ -1,0 +1,126 @@
+Create a full-stack web application for a platform called Flypside, intended for business partners. The frontend should use React (with React Router) and the backend should use Node.js (Express). Use MongoDB for the database.
+
+The application will be hosted at business.goflypside.com.
+
+🔐 Authentication:
+Pages for Sign Up, Login, and Forgot Password.
+
+Use JWT-based authentication.
+
+Add field validations:
+
+Email: must be valid format.
+
+Password: min 8 characters, must include a symbol and number.
+
+Contact number: 10-digit mobile format.
+
+Store passwords securely (hashed using bcrypt).
+
+👤 Business Partner Registration:
+After login, users can complete a registration form as a business partner with the following fields:
+
+First name, Last name
+
+Contact number
+
+Sex (M/F/Other)
+
+DOB
+
+Info (free text)
+
+ID number (with length restriction, e.g., 12–16 chars)
+
+ID verified (boolean)
+
+Is business (boolean)
+
+Is lost (boolean)
+
+Current city
+
+Relationship status
+
+Looking for (serious/fun)
+
+Interests (multi-select)
+
+Social info (free text)
+
+Attended events (list)
+
+All fields should have appropriate validation.
+
+🏠 Pages:
+Login Page
+
+Signup/Onboarding Page
+
+Forgot Password
+
+Dashboard (post-login landing page)
+
+Profile Page (view/edit business profile)
+
+Create Event Page
+
+Event History Page (list all created events)
+
+Event Detail Page
+
+Offers Page (Current & Expired)
+
+Create Offer Page
+
+Analytics Page
+
+🎟️ Events:
+Business partners can create events with:
+
+Event name, description, banner image (upload support)
+
+Date & time (start and end)
+
+Max participants
+
+Price (if any)
+
+ID verification requirement (toggle)
+
+Invite participants (selective list)
+
+Location (integrate Google Maps API)
+
+Host details (name, ID number, isBusiness)
+
+Attach promotional offers to events
+
+Add gallery images (5–10 max per event)
+
+💸 Offers:
+Business partners can create promotional offers:
+
+Offer text (auto-generated or custom)
+
+Offer percentage
+
+Start date (now or custom)
+
+Expiry date
+
+Linkable to events
+
+🧠 Tech Stack:
+Frontend: React + Tailwind CSS, React Router, Axios
+
+Backend: Node.js + Express + MongoDB (Mongoose)
+
+Auth: JWT, bcrypt
+
+Image Storage: Cloudinary or local file system
+
+Validation: Yup or custom validators
+
+Please generate a working boilerplate with the above functionality, and separate folders for client and server.
+
