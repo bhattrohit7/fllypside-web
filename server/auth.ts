@@ -4,6 +4,7 @@ import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
+import { dbStorage } from "./storage-db";
 import { User, InsertUser, insertUserSchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -36,7 +37,7 @@ export function setupAuth(app: Express) {
     secret: process.env.SESSION_SECRET || "flypside-secret-key",
     resave: false,
     saveUninitialized: false,
-    store: storage.sessionStore,
+    store: dbStorage.sessionStore,
     cookie: {
       secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
@@ -54,7 +55,7 @@ export function setupAuth(app: Express) {
       usernameField: 'email',
     }, async (email, password, done) => {
       try {
-        const user = await storage.getUserByEmail(email);
+        const user = await dbStorage.getUserByEmail(email);
         
         if (!user) {
           return done(null, false, { message: "Invalid email or password" });
@@ -84,7 +85,7 @@ export function setupAuth(app: Express) {
   // Deserialize user from the session
   passport.deserializeUser(async (id: number, done) => {
     try {
-      const user = await storage.getUser(id);
+      const user = await dbStorage.getUser(id);
       done(null, user);
     } catch (error) {
       done(error);
@@ -98,7 +99,7 @@ export function setupAuth(app: Express) {
       const validatedData = insertUserSchema.parse(req.body);
       
       // Check if user already exists
-      const existingUser = await storage.getUserByEmail(validatedData.email);
+      const existingUser = await dbStorage.getUserByEmail(validatedData.email);
       if (existingUser) {
         return res.status(400).json({ message: "Email already in use" });
       }
@@ -107,7 +108,7 @@ export function setupAuth(app: Express) {
       const hashedPassword = await hashPassword(validatedData.password);
       
       // Create user
-      const user = await storage.createUser({
+      const user = await dbStorage.createUser({
         ...validatedData,
         password: hashedPassword,
       });
@@ -173,7 +174,7 @@ export function setupAuth(app: Express) {
       const { email } = forgotPasswordSchema.parse(req.body);
       
       // Check if user exists
-      const user = await storage.getUserByEmail(email);
+      const user = await dbStorage.getUserByEmail(email);
       if (!user) {
         // For security reasons, don't reveal if the email exists or not
         return res.status(200).json({ message: "If an account with that email exists, a password reset link will be sent." });
