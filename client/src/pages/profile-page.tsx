@@ -144,7 +144,7 @@ export default function ProfilePage() {
                           <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             {isLoading ? (
                               <Skeleton className="h-5 w-32" />
-                            ) : profile?.isBusiness ? (
+                            ) : businessPartner?.isBusiness ? (
                               <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
                                 Registered Business
                               </Badge>
@@ -161,7 +161,7 @@ export default function ProfilePage() {
                           <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             {isLoading ? (
                               <Skeleton className="h-5 w-32" />
-                            ) : profile?.currentCity || "Not provided"}
+                            ) : businessPartner?.currentCity || "Not provided"}
                           </dd>
                         </div>
                         
@@ -170,7 +170,7 @@ export default function ProfilePage() {
                           <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             {isLoading ? (
                               <Skeleton className="h-5 w-32" />
-                            ) : profile?.relationshipStatus || "Not provided"}
+                            ) : businessPartner?.relationshipStatus || "Not provided"}
                           </dd>
                         </div>
                         
@@ -179,9 +179,9 @@ export default function ProfilePage() {
                           <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             {isLoading ? (
                               <Skeleton className="h-5 w-32" />
-                            ) : profile?.lookingFor === "serious" ? (
+                            ) : businessPartner?.lookingFor === "serious" ? (
                               "Business partnerships (Serious)"
-                            ) : profile?.lookingFor === "fun" ? (
+                            ) : businessPartner?.lookingFor === "fun" ? (
                               "Networking (Fun)"
                             ) : (
                               "Not specified"
@@ -198,9 +198,9 @@ export default function ProfilePage() {
                                   <Skeleton key={i} className="h-6 w-20" />
                                 ))}
                               </div>
-                            ) : profile?.interests && profile.interests.length > 0 ? (
+                            ) : businessPartner?.interests && businessPartner.interests.length > 0 ? (
                               <div className="flex flex-wrap gap-2">
-                                {profile.interests.map((interest, idx) => (
+                                {businessPartner.interests.map((interest: string, idx: number) => (
                                   <Badge key={idx} variant="outline" className="bg-gray-100 text-gray-800">
                                     {interest}
                                   </Badge>
@@ -221,7 +221,7 @@ export default function ProfilePage() {
                                 <Skeleton className="h-4 w-full mb-2" />
                                 <Skeleton className="h-4 w-3/4" />
                               </>
-                            ) : profile?.info || "No information provided"}
+                            ) : businessPartner?.info || "No information provided"}
                           </dd>
                         </div>
                         
@@ -233,7 +233,7 @@ export default function ProfilePage() {
                                 <Skeleton className="h-4 w-full mb-2" />
                                 <Skeleton className="h-4 w-1/2" />
                               </>
-                            ) : profile?.socialInfo || "No social information provided"}
+                            ) : businessPartner?.socialInfo || "No social information provided"}
                           </dd>
                         </div>
                       </dl>
