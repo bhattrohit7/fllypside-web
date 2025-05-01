@@ -140,27 +140,44 @@ export class DatabaseStorage {
     console.log("Creating event with data:", JSON.stringify(data, null, 2));
     
     try {
-      // Make sure we have the required fields with correct types
+      // Ensure dates are properly handled
+      let startDate: Date;
+      let endDate: Date;
+      
+      try {
+        startDate = data.startDate instanceof Date ? data.startDate : new Date(data.startDate);
+        endDate = data.endDate instanceof Date ? data.endDate : new Date(data.endDate);
+      } catch (err) {
+        console.error("Date parsing error:", err);
+        throw new Error("Invalid date format");
+      }
+      
+      // Build event data with explicit type conversions and validations
       const eventData = {
-        hostId: data.hostId,
-        name: data.name,
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate),
-        description: data.description ?? null,
-        bannerImage: data.bannerImage ?? null,
-        maxParticipants: data.maxParticipants ?? 50,
-        price: data.price ?? 0,
-        currency: data.currency ?? "INR",
-        requireIdVerification: data.requireIdVerification ?? false,
-        location: data.location ?? null,
-        draftMode: data.draftMode ?? false,
+        hostId: Number(data.hostId),
+        name: String(data.name || "Untitled Event"),
+        startDate: startDate,
+        endDate: endDate,
+        description: data.description !== undefined ? String(data.description) : null,
+        bannerImage: data.bannerImage || null,
+        maxParticipants: Number(data.maxParticipants || 50),
+        price: Number(data.price || 0),
+        currency: String(data.currency || "INR"),
+        requireIdVerification: Boolean(data.requireIdVerification),
+        location: data.location ? String(data.location) : null,
+        draftMode: Boolean(data.draftMode),
       };
       
       console.log("Formatted event data for DB:", JSON.stringify(eventData, null, 2));
       
-      const [event] = await db.insert(events).values(eventData).returning();
-      console.log("Event created successfully:", JSON.stringify(event, null, 2));
-      return event;
+      try {
+        const [event] = await db.insert(events).values(eventData).returning();
+        console.log("Event created successfully:", JSON.stringify(event, null, 2));
+        return event;
+      } catch (dbError: any) {
+        console.error("Database error when inserting event:", dbError);
+        throw new Error(`Database error: ${dbError.message || "Unknown error"}`);
+      }
     } catch (error) {
       console.error("Error creating event in database:", error);
       throw error;
@@ -168,15 +185,46 @@ export class DatabaseStorage {
   }
 
   async updateEvent(id: number, data: Partial<Event>): Promise<Event> {
-    const updateData = { ...data };
-    delete (updateData as any).id; // Remove id if present
+    console.log("Updating event with data:", JSON.stringify(data, null, 2));
     
-    const [event] = await db
-      .update(events)
-      .set(updateData)
-      .where(eq(events.id, id))
-      .returning();
-    return event;
+    try {
+      // Process data carefully
+      const updateData: Record<string, any> = { ...data };
+      delete updateData.id; // Remove id if present
+      
+      // Handle date fields if present
+      if (data.startDate) {
+        try {
+          updateData.startDate = data.startDate instanceof Date ? data.startDate : new Date(data.startDate);
+        } catch (err) {
+          console.error("Start date parsing error:", err);
+          throw new Error("Invalid start date format");
+        }
+      }
+      
+      if (data.endDate) {
+        try {
+          updateData.endDate = data.endDate instanceof Date ? data.endDate : new Date(data.endDate);
+        } catch (err) {
+          console.error("End date parsing error:", err);
+          throw new Error("Invalid end date format");
+        }
+      }
+      
+      // Perform the update
+      console.log("Formatted update data for DB:", JSON.stringify(updateData, null, 2));
+      const [event] = await db
+        .update(events)
+        .set(updateData)
+        .where(eq(events.id, id))
+        .returning();
+        
+      console.log("Event updated successfully:", JSON.stringify(event, null, 2));
+      return event;
+    } catch (error) {
+      console.error("Error updating event in database:", error);
+      throw error;
+    }
   }
 
   async deleteEvent(id: number): Promise<void> {
