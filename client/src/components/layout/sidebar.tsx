@@ -36,38 +36,38 @@ export default function Sidebar() {
           <div className="flex-1 flex flex-col overflow-y-auto">
             <nav className="flex-1 px-2 py-4 space-y-1">
               <Link href="/">
-                <a className={`sidebar-link ${location === '/' ? 'active' : ''}`}>
+                <div className={`sidebar-link ${location === '/' ? 'active' : ''}`}>
                   <Home className="mr-3 h-5 w-5" />
                   Dashboard
-                </a>
+                </div>
               </Link>
               
               <Link href="/profile">
-                <a className={`sidebar-link ${location === '/profile' ? 'active' : ''}`}>
+                <div className={`sidebar-link ${location === '/profile' ? 'active' : ''}`}>
                   <User className="mr-3 h-5 w-5" />
                   Profile
-                </a>
+                </div>
               </Link>
               
               <Link href="/events">
-                <a className={`sidebar-link ${location.startsWith('/events') ? 'active' : ''}`}>
+                <div className={`sidebar-link ${location.startsWith('/events') ? 'active' : ''}`}>
                   <Calendar className="mr-3 h-5 w-5" />
                   Events
-                </a>
+                </div>
               </Link>
               
               <Link href="/offers">
-                <a className={`sidebar-link ${location.startsWith('/offers') ? 'active' : ''}`}>
+                <div className={`sidebar-link ${location.startsWith('/offers') ? 'active' : ''}`}>
                   <Tag className="mr-3 h-5 w-5" />
                   Offers
-                </a>
+                </div>
               </Link>
               
               <Link href="/analytics">
-                <a className={`sidebar-link ${location === '/analytics' ? 'active' : ''}`}>
+                <div className={`sidebar-link ${location === '/analytics' ? 'active' : ''}`}>
                   <LineChart className="mr-3 h-5 w-5" />
                   Analytics
-                </a>
+                </div>
               </Link>
             </nav>
           </div>

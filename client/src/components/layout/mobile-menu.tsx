@@ -73,53 +73,53 @@ export default function MobileMenu() {
             </div>
             <nav className="mt-5 px-2 space-y-1">
               <Link href="/">
-                <a 
+                <div 
                   className={`sidebar-link ${location === '/' ? 'active' : ''}`}
                   onClick={closeMobileMenu}
                 >
                   <Home className="mr-4 h-5 w-5" />
                   Dashboard
-                </a>
+                </div>
               </Link>
               
               <Link href="/profile">
-                <a 
+                <div 
                   className={`sidebar-link ${location === '/profile' ? 'active' : ''}`}
                   onClick={closeMobileMenu}
                 >
                   <User className="mr-4 h-5 w-5" />
                   Profile
-                </a>
+                </div>
               </Link>
               
               <Link href="/events">
-                <a 
+                <div 
                   className={`sidebar-link ${location.startsWith('/events') ? 'active' : ''}`}
                   onClick={closeMobileMenu}
                 >
                   <Calendar className="mr-4 h-5 w-5" />
                   Events
-                </a>
+                </div>
               </Link>
               
               <Link href="/offers">
-                <a 
+                <div 
                   className={`sidebar-link ${location.startsWith('/offers') ? 'active' : ''}`}
                   onClick={closeMobileMenu}
                 >
                   <Tag className="mr-4 h-5 w-5" />
                   Offers
-                </a>
+                </div>
               </Link>
               
               <Link href="/analytics">
-                <a 
+                <div 
                   className={`sidebar-link ${location === '/analytics' ? 'active' : ''}`}
                   onClick={closeMobileMenu}
                 >
                   <LineChart className="mr-4 h-5 w-5" />
                   Analytics
-                </a>
+                </div>
               </Link>
             </nav>
           </div>
