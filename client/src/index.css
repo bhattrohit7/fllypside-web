@@ -97,7 +97,11 @@
 
 @layer components {
   .sidebar-link {
-    @apply text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors;
+    @apply text-sidebar-foreground flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors;
+  }
+  
+  .sidebar-link:hover {
+    @apply bg-sidebar-accent text-sidebar-foreground;
   }
   
   .sidebar-link.active {

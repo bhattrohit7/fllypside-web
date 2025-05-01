@@ -32,6 +32,7 @@ const eventFormSchema = insertEventSchema.extend({
   startDateTime: z.string().min(1, "Start date and time is required"),
   endDateTime: z.string().min(1, "End date and time is required"),
   offerId: z.string().optional(),
+  currency: z.enum(["INR", "USD", "EUR", "GBP", "AUD"]).default("INR"),
 });
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
@@ -71,6 +72,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
       location: existingData?.location || "",
       draftMode: false,
       offerId: existingData?.offerId || "",
+      currency: existingData?.currency || "INR",
     }
   });
 
@@ -326,7 +328,13 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                     <FormControl>
                       <div className="relative rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-gray-500 sm:text-sm">$</span>
+                          <span className="text-gray-500 sm:text-sm">
+                            {form.watch("currency") === "INR" ? "₹" : 
+                            form.watch("currency") === "USD" ? "$" : 
+                            form.watch("currency") === "EUR" ? "€" : 
+                            form.watch("currency") === "GBP" ? "£" : 
+                            form.watch("currency") === "AUD" ? "A$" : "₹"}
+                          </span>
                         </div>
                         <Input 
                           {...field}
@@ -340,7 +348,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                           }}
                         />
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                          <span className="text-gray-500 sm:text-sm">USD</span>
+                          <span className="text-gray-500 sm:text-sm">{form.watch("currency")}</span>
                         </div>
                       </div>
                     </FormControl>
