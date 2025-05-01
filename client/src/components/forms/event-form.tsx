@@ -397,8 +397,8 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                   <FormItem className="col-span-6">
                     <FormLabel>Attach promotional offer</FormLabel>
                     <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
+                      onValueChange={(value) => field.onChange(value === "none" ? "" : value)} 
+                      defaultValue={field.value || "none"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -406,7 +406,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {offers?.map((offer: any) => (
                           <SelectItem key={offer.id} value={offer.id.toString()}>
                             {offer.text} - {offer.percentage}% off
