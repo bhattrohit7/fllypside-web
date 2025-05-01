@@ -78,10 +78,19 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
 
   const createEventMutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await apiRequest("POST", "/api/events", data);
-      return res.json();
+      console.log("Sending event creation request with data:", data);
+      try {
+        const res = await apiRequest("POST", "/api/events", data);
+        const result = await res.json();
+        console.log("Event creation response:", result);
+        return result;
+      } catch (error) {
+        console.error("Error during API request:", error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Event created successfully:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       toast({
         title: "Event created",
@@ -89,12 +98,17 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
       });
       onSuccess();
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Event creation mutation error:", error);
       toast({
         title: "Failed to create event",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
+      setIsSubmitting(false);
+    },
+    onSettled: () => {
+      console.log("Event creation mutation settled");
       setIsSubmitting(false);
     }
   });

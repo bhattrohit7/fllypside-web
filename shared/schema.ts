@@ -85,8 +85,10 @@ export const events = pgTable("events", {
   endDate: timestamp("end_date").notNull(),
   maxParticipants: integer("max_participants").notNull(),
   price: integer("price").default(0),
+  currency: text("currency").default("INR"),
   requireIdVerification: boolean("require_id_verification").default(false),
   location: text("location"),
+  draftMode: boolean("draft_mode").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -103,6 +105,8 @@ export const insertEventSchema = createInsertSchema(events)
     location: z.string().optional().nullable(),
     requireIdVerification: z.boolean().optional().default(false),
     currency: z.enum(["INR", "USD", "EUR", "GBP", "AUD"]).optional().default("INR"),
+    draftMode: z.boolean().optional().default(false),
+    offerId: z.number().optional(),
   });
 
 // Event images table
