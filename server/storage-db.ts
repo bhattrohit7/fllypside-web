@@ -104,22 +104,23 @@ export class DatabaseStorage {
     const now = new Date();
     console.log(`Getting ${status} events for business partner ${businessPartnerId} from database`);
     
+    // Base query to get events for this business partner
     let query = db.select().from(events).where(eq(events.hostId, businessPartnerId));
     
     if (status === "upcoming") {
-      // Upcoming events: published events (not drafts) with future start dates
+      // Upcoming events: MUST be published (not drafts) with future start dates
       query = query.where(and(
         eq(events.draftMode, false),
         gte(events.startDate, now)
       ));
     } else if (status === "past") {
-      // Past events: published events (not drafts) with past end dates
+      // Past events: MUST be published (not drafts) with past end dates
       query = query.where(and(
         eq(events.draftMode, false),
         lt(events.endDate, now)
       ));
     } else if (status === "draft") {
-      // Draft events: specifically marked as drafts regardless of dates
+      // Draft events: MUST be specifically marked as drafts regardless of dates
       query = query.where(eq(events.draftMode, true));
     }
     
