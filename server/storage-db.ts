@@ -102,24 +102,30 @@ export class DatabaseStorage {
 
   async getEventsByBusinessPartnerId(businessPartnerId: number, status: string): Promise<Event[]> {
     const now = new Date();
+    console.log(`Getting ${status} events for business partner ${businessPartnerId} from database`);
     
     if (status === "upcoming") {
+      // Upcoming events: not drafts, start date in the future
       return db
         .select()
         .from(events)
         .where(and(
           eq(events.hostId, businessPartnerId),
+          eq(events.draftMode, false),
           gte(events.startDate, now)
         ));
     } else if (status === "past") {
+      // Past events: not drafts, end date in the past
       return db
         .select()
         .from(events)
         .where(and(
           eq(events.hostId, businessPartnerId),
+          eq(events.draftMode, false),
           lt(events.endDate, now)
         ));
     } else if (status === "draft") {
+      // Draft events: specifically marked as drafts
       return db
         .select()
         .from(events)

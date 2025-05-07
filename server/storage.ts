@@ -404,6 +404,7 @@ export class MemStorage implements IStorage {
 
   async getEventsByBusinessPartnerId(businessPartnerId: number, status: string): Promise<Event[]> {
     const now = new Date();
+    console.log(`Getting ${status} events for business partner ${businessPartnerId}`);
     
     return Array.from(this.events.values())
       .filter((event) => {
@@ -412,12 +413,14 @@ export class MemStorage implements IStorage {
         }
         
         if (status === "upcoming") {
-          return isAfter(new Date(event.startDate), now);
+          // Upcoming events: not drafts, start date in the future
+          return !event.draftMode && isAfter(new Date(event.startDate), now);
         } else if (status === "past") {
-          return isBefore(new Date(event.endDate), now);
+          // Past events: not drafts, end date in the past
+          return !event.draftMode && isBefore(new Date(event.endDate), now);
         } else if (status === "draft") {
-          // In a real app, we would have a 'draft' field
-          return false;
+          // Draft events: specifically marked as drafts
+          return event.draftMode === true;
         }
         
         return true;
