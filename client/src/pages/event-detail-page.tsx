@@ -13,13 +13,15 @@ import {
   ArrowLeft, 
   AlertTriangle,
   Ban,
-  HelpCircle
+  HelpCircle,
+  Share2
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import EventAnalytics from "@/components/event-analytics";
+import { ShareDialog } from "@/components/share-dialog";
 import {
   Dialog,
   DialogContent,
@@ -220,6 +222,23 @@ export default function EventDetailPage() {
                       <Edit className="h-4 w-4 mr-1" /> Edit
                     </Button>
                   </Link>
+                  
+                  {/* Share Button */}
+                  <ShareDialog
+                    title={event.name}
+                    description={event.description}
+                    url={window.location.href}
+                    image={event.bannerImage || defaultImage}
+                    trigger={
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex items-center text-blue-600 border-blue-200 hover:bg-blue-50"
+                      >
+                        <Share2 className="h-4 w-4 mr-1" /> Share
+                      </Button>
+                    }
+                  />
                   
                   {/* Cancel Button with Tooltip if needed */}
                   {event.status !== 'cancelled' && (
