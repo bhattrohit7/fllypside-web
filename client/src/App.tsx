@@ -24,6 +24,7 @@ function Router() {
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/events" component={EventsPage} />
       <ProtectedRoute path="/events/create" component={CreateEventPage} />
+      <ProtectedRoute path="/events/:id/edit" component={CreateEventPage} />
       <ProtectedRoute path="/events/:id" component={EventDetailPage} />
       <ProtectedRoute path="/offers" component={OffersPage} />
       <ProtectedRoute path="/offers/create" component={CreateOfferPage} />
