@@ -26,7 +26,7 @@ This admin panel is built for **business partners** to:
 
 ## 📦 Tech Stack
 
-- **Frontend:** React (via Replit)
+- **Frontend:** React
 - **Styling:** Tailwind CSS
 - **Authentication:** Custom or third-party (e.g., Supabase/Auth.js)
 - **Hosting:** Replit
