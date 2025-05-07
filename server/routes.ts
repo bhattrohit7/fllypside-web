@@ -74,6 +74,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user!.id;
       const status = req.query.status as string || "upcoming"; // upcoming, past, draft
       
+      console.log("GET /api/events with status:", status, "query params:", req.query);
+      
       // Get business partner for the user
       const businessPartner = await storage.getBusinessPartnerByUserId(userId);
       
@@ -82,8 +84,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const events = await storage.getEventsByBusinessPartnerId(businessPartner.id, status);
+      console.log(`Fetched ${events.length} events with status '${status}'`);
       res.json(events);
     } catch (error) {
+      console.error("Error fetching events:", error);
       res.status(500).json({ message: "Failed to fetch events" });
     }
   });
