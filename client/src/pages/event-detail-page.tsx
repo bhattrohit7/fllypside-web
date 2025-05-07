@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users, DollarSign, Edit, Trash2, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -249,9 +248,9 @@ export default function EventDetailPage() {
           <Card className="p-6 shadow-md mt-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Registered Participants</h3>
-              <Badge className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+              <div className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-2.5 py-0.5 rounded-full text-xs font-semibold">
                 {event.currentParticipants} Total
-              </Badge>
+              </div>
             </div>
             
             {isParticipantsLoading ? (
