@@ -10,7 +10,7 @@ import { PlusCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
-type EventTab = "upcoming" | "past";
+type EventTab = "upcoming" | "past" | "cancelled";
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<EventTab>("upcoming");
@@ -59,6 +59,7 @@ export default function EventsPage() {
                   <TabsList>
                     <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
                     <TabsTrigger value="past">Past</TabsTrigger>
+                    <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
                   </TabsList>
                 </Tabs>
                 
@@ -91,7 +92,8 @@ export default function EventsPage() {
                     <h3 className="mt-2 text-lg font-medium text-gray-900">No events found</h3>
                     <p className="mt-1 text-sm text-gray-500">
                       {activeTab === "upcoming" ? "You don't have any upcoming events." : 
-                       "You don't have any past events."}
+                       activeTab === "past" ? "You don't have any past events." :
+                       "You don't have any cancelled events."}
                     </p>
                     <div className="mt-6">
                       <Link href="/events/create">
