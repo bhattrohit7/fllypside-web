@@ -43,7 +43,7 @@ export interface IStorage {
   getEvent(id: number): Promise<Event | undefined>;
   getEventsByBusinessPartnerId(businessPartnerId: number, status: string): Promise<Event[]>;
   createEvent(data: InsertEvent): Promise<Event>;
-  updateEvent(id: number, data: InsertEvent): Promise<Event>;
+  updateEvent(id: number, data: Partial<Event>): Promise<Event>;
   deleteEvent(id: number): Promise<void>;
 
   // Offer methods
@@ -465,7 +465,7 @@ export class MemStorage implements IStorage {
     return event;
   }
 
-  async updateEvent(id: number, data: InsertEvent): Promise<Event> {
+  async updateEvent(id: number, data: Partial<Event>): Promise<Event> {
     const existingEvent = await this.getEvent(id);
     
     if (!existingEvent) {
@@ -730,7 +730,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateEvent(id: number, data: InsertEvent): Promise<Event> {
+  async updateEvent(id: number, data: Partial<Event>): Promise<Event> {
     const [event] = await db
       .update(events)
       .set(data)
