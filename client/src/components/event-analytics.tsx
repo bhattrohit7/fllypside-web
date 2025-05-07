@@ -68,9 +68,14 @@ const EventAnalytics: React.FC<EventAnalyticsProps> = ({ eventId }) => {
   return (
     <Card>
       <CardContent className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Event Performance</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Event Performance</h3>
+          <span className="text-xs text-gray-500 flex items-center">
+            <span className="animate-bounce inline-block mr-1">↓</span> Scroll for more
+          </span>
+        </div>
         
-        <div className="space-y-6">
+        <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 scroll-smooth">
           {/* Attendance Rate */}
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -131,7 +136,7 @@ const EventAnalytics: React.FC<EventAnalyticsProps> = ({ eventId }) => {
                 {Object.entries(eventAnalytics.demographics).map(([key, value]) => (
                   <div key={key} className="bg-gray-50 rounded-md p-2">
                     <div className="text-xs text-gray-500">{key}</div>
-                    <div className="text-sm font-medium">{value}%</div>
+                    <div className="text-sm font-medium">{String(value)}%</div>
                   </div>
                 ))}
               </div>
