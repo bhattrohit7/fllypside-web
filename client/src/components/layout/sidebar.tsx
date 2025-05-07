@@ -29,53 +29,53 @@ export default function Sidebar() {
   return (
     <div className="hidden md:flex md:flex-shrink-0">
       <div className="flex flex-col w-64">
-        <div className="flex flex-col h-0 flex-1 bg-sidebar-background">
-          <div className="flex items-center h-16 flex-shrink-0 px-4 bg-gray-900">
-            <span className="text-xl font-semibold text-white">Flypside</span>
+        <div className="sidebar flex flex-col h-0 flex-1">
+          <div className="flex items-center h-16 flex-shrink-0 px-4 bg-gray-900 shadow-md">
+            <span className="text-xl font-bold text-white tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Flypside</span>
           </div>
           <div className="flex-1 flex flex-col overflow-y-auto">
-            <nav className="flex-1 px-2 py-4 space-y-1">
+            <nav className="flex-1 px-3 py-6 space-y-2">
               <Link href="/">
                 <div className={`sidebar-link ${location === '/' ? 'active' : ''}`}>
-                  <Home className="mr-3 h-5 w-5" />
+                  <Home className="h-5 w-5" />
                   Dashboard
                 </div>
               </Link>
               
               <Link href="/profile">
                 <div className={`sidebar-link ${location === '/profile' ? 'active' : ''}`}>
-                  <User className="mr-3 h-5 w-5" />
+                  <User className="h-5 w-5" />
                   Profile
                 </div>
               </Link>
               
               <Link href="/events">
                 <div className={`sidebar-link ${location.startsWith('/events') ? 'active' : ''}`}>
-                  <Calendar className="mr-3 h-5 w-5" />
+                  <Calendar className="h-5 w-5" />
                   Events
                 </div>
               </Link>
               
               <Link href="/offers">
                 <div className={`sidebar-link ${location.startsWith('/offers') ? 'active' : ''}`}>
-                  <Tag className="mr-3 h-5 w-5" />
+                  <Tag className="h-5 w-5" />
                   Offers
                 </div>
               </Link>
               
               <Link href="/analytics">
                 <div className={`sidebar-link ${location === '/analytics' ? 'active' : ''}`}>
-                  <LineChart className="mr-3 h-5 w-5" />
+                  <LineChart className="h-5 w-5" />
                   Analytics
                 </div>
               </Link>
             </nav>
           </div>
-          <div className="p-4 border-t border-sidebar-border">
+          <div className="p-4 border-t border-gray-800 bg-gray-900/80 backdrop-blur-sm">
             <div className="flex items-center">
-              <Avatar>
+              <Avatar className="border-2 border-primary/30 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <AvatarImage src="" alt={user?.username ?? "User"} />
-                <AvatarFallback className="bg-primary text-white">{getInitials()}</AvatarFallback>
+                <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-white font-medium">{getInitials()}</AvatarFallback>
               </Avatar>
               <div className="ml-3">
                 <p className="text-sm font-medium text-white">
@@ -84,7 +84,7 @@ export default function Sidebar() {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-xs font-medium text-gray-300 hover:text-white p-0"
+                  className="text-xs font-medium text-gray-300 hover:text-white p-0 transition-colors duration-200"
                   onClick={handleLogout}
                   disabled={logoutMutation.isPending}
                 >

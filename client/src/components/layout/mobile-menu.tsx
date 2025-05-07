@@ -38,15 +38,15 @@ export default function MobileMenu() {
   return (
     <>
       {/* Mobile header */}
-      <div className="md:hidden bg-sidebar-background text-white p-4 flex items-center justify-between">
+      <div className="md:hidden bg-gray-900 text-white p-4 flex items-center justify-between shadow-md">
         <div className="flex items-center">
-          <span className="text-xl font-semibold">Flypside</span>
+          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Flypside</span>
         </div>
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => setIsOpen(true)} 
-          className="text-gray-300"
+          className="text-gray-300 hover:text-white transition-colors duration-200 rounded-xl"
         >
           <Menu className="h-6 w-6" />
         </Button>
@@ -54,14 +54,14 @@ export default function MobileMenu() {
       
       {/* Mobile menu (hidden by default) */}
       <div className={`md:hidden fixed inset-0 z-40 ${isOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={closeMobileMenu}></div>
-        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-sidebar-background">
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm" onClick={closeMobileMenu}></div>
+        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gray-900 shadow-2xl">
           <div className="absolute top-0 right-0 -mr-12 pt-2">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={closeMobileMenu} 
-              className="ml-1 flex items-center justify-center h-10 w-10 rounded-full text-white"
+              className="ml-1 flex items-center justify-center h-10 w-10 rounded-full text-white hover:bg-gray-800/50 transition-all duration-200"
             >
               <span className="sr-only">Close sidebar</span>
               <X className="h-6 w-6" />
@@ -69,15 +69,15 @@ export default function MobileMenu() {
           </div>
           <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
             <div className="flex-shrink-0 flex items-center px-4">
-              <span className="text-xl font-semibold text-white">Flypside</span>
+              <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Flypside</span>
             </div>
-            <nav className="mt-5 px-2 space-y-1">
+            <nav className="mt-8 px-3 space-y-2">
               <Link href="/">
                 <div 
                   className={`sidebar-link ${location === '/' ? 'active' : ''}`}
                   onClick={closeMobileMenu}
                 >
-                  <Home className="mr-4 h-5 w-5" />
+                  <Home className="h-5 w-5" />
                   Dashboard
                 </div>
               </Link>
@@ -87,7 +87,7 @@ export default function MobileMenu() {
                   className={`sidebar-link ${location === '/profile' ? 'active' : ''}`}
                   onClick={closeMobileMenu}
                 >
-                  <User className="mr-4 h-5 w-5" />
+                  <User className="h-5 w-5" />
                   Profile
                 </div>
               </Link>
@@ -97,7 +97,7 @@ export default function MobileMenu() {
                   className={`sidebar-link ${location.startsWith('/events') ? 'active' : ''}`}
                   onClick={closeMobileMenu}
                 >
-                  <Calendar className="mr-4 h-5 w-5" />
+                  <Calendar className="h-5 w-5" />
                   Events
                 </div>
               </Link>
@@ -107,7 +107,7 @@ export default function MobileMenu() {
                   className={`sidebar-link ${location.startsWith('/offers') ? 'active' : ''}`}
                   onClick={closeMobileMenu}
                 >
-                  <Tag className="mr-4 h-5 w-5" />
+                  <Tag className="h-5 w-5" />
                   Offers
                 </div>
               </Link>
@@ -117,17 +117,17 @@ export default function MobileMenu() {
                   className={`sidebar-link ${location === '/analytics' ? 'active' : ''}`}
                   onClick={closeMobileMenu}
                 >
-                  <LineChart className="mr-4 h-5 w-5" />
+                  <LineChart className="h-5 w-5" />
                   Analytics
                 </div>
               </Link>
             </nav>
           </div>
-          <div className="flex-shrink-0 flex border-t border-sidebar-border p-4">
+          <div className="flex-shrink-0 flex border-t border-gray-800 p-4 bg-gray-900/80 backdrop-blur-sm">
             <div className="flex items-center">
-              <Avatar>
+              <Avatar className="border-2 border-primary/30 shadow-md">
                 <AvatarImage src="" alt={user?.username ?? "User"} />
-                <AvatarFallback className="bg-primary text-white">{getInitials()}</AvatarFallback>
+                <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-white font-medium">{getInitials()}</AvatarFallback>
               </Avatar>
               <div className="ml-3">
                 <p className="text-base font-medium text-white">
@@ -136,7 +136,7 @@ export default function MobileMenu() {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-sm font-medium text-gray-300 hover:text-white p-0"
+                  className="text-sm font-medium text-gray-300 hover:text-white p-0 transition-colors duration-200"
                   onClick={handleLogout}
                   disabled={logoutMutation.isPending}
                 >
