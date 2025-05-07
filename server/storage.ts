@@ -413,13 +413,13 @@ export class MemStorage implements IStorage {
         }
         
         if (status === "upcoming") {
-          // Upcoming events: not drafts, start date in the future
+          // Upcoming events: published events (not drafts) with future start dates
           return !event.draftMode && isAfter(new Date(event.startDate), now);
         } else if (status === "past") {
-          // Past events: not drafts, end date in the past
+          // Past events: published events (not drafts) with past end dates
           return !event.draftMode && isBefore(new Date(event.endDate), now);
         } else if (status === "draft") {
-          // Draft events: specifically marked as drafts
+          // Draft events: specifically marked as drafts regardless of dates
           return event.draftMode === true;
         }
         

@@ -234,6 +234,8 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
   const saveDraft = () => {
     try {
       console.log("Saving draft...");
+      setIsSubmitting(true);
+      
       // Get current values 
       const currentValues = form.getValues();
       
@@ -244,25 +246,29 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
           description: "Event name is required, even for drafts",
           variant: "destructive",
         });
+        setIsSubmitting(false);
         return;
       }
       
-      // Set draftMode to true and trigger submission
-      form.setValue("draftMode", true);
+      // Set minimal requirements for a draft event
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
       
-      // Create the event data object directly
+      // Create the event data object with draft mode explicitly set to true
       const eventData = {
         hostId: businessPartner?.id,
         name: currentValues.name,
         description: currentValues.description || "",
-        startDate: currentValues.startDateTime ? new Date(currentValues.startDateTime).toISOString() : new Date().toISOString(),
-        endDate: currentValues.endDateTime ? new Date(currentValues.endDateTime).toISOString() : new Date(Date.now() + 86400000).toISOString(),
+        // Use provided dates if available, or default to today/tomorrow for drafts
+        startDate: currentValues.startDateTime ? new Date(currentValues.startDateTime).toISOString() : now.toISOString(),
+        endDate: currentValues.endDateTime ? new Date(currentValues.endDateTime).toISOString() : tomorrow.toISOString(),
         maxParticipants: Number(currentValues.maxParticipants || 50),
         price: Number(currentValues.price || 0),
         currency: currentValues.currency || "INR",
         requireIdVerification: Boolean(currentValues.requireIdVerification),
         location: currentValues.location || "",
-        draftMode: true  // Always true for drafts
+        draftMode: true  // Always true for drafts - this is critical
       };
       
       // Add banner image if available
@@ -285,6 +291,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
         description: "There was a problem saving the draft",
         variant: "destructive",
       });
+      setIsSubmitting(false);
     }
   };
 

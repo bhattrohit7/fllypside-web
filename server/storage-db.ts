@@ -104,42 +104,29 @@ export class DatabaseStorage {
     const now = new Date();
     console.log(`Getting ${status} events for business partner ${businessPartnerId} from database`);
     
+    let query = db.select().from(events).where(eq(events.hostId, businessPartnerId));
+    
     if (status === "upcoming") {
-      // Upcoming events: not drafts, start date in the future
-      return db
-        .select()
-        .from(events)
-        .where(and(
-          eq(events.hostId, businessPartnerId),
-          eq(events.draftMode, false),
-          gte(events.startDate, now)
-        ));
+      // Upcoming events: published events (not drafts) with future start dates
+      query = query.where(and(
+        eq(events.draftMode, false),
+        gte(events.startDate, now)
+      ));
     } else if (status === "past") {
-      // Past events: not drafts, end date in the past
-      return db
-        .select()
-        .from(events)
-        .where(and(
-          eq(events.hostId, businessPartnerId),
-          eq(events.draftMode, false),
-          lt(events.endDate, now)
-        ));
+      // Past events: published events (not drafts) with past end dates
+      query = query.where(and(
+        eq(events.draftMode, false),
+        lt(events.endDate, now)
+      ));
     } else if (status === "draft") {
-      // Draft events: specifically marked as drafts
-      return db
-        .select()
-        .from(events)
-        .where(and(
-          eq(events.hostId, businessPartnerId),
-          eq(events.draftMode, true)
-        ));
-    } else {
-      // Return all events for this business partner
-      return db
-        .select()
-        .from(events)
-        .where(eq(events.hostId, businessPartnerId));
+      // Draft events: specifically marked as drafts regardless of dates
+      query = query.where(eq(events.draftMode, true));
     }
+    
+    // Execute the query
+    const results = await query;
+    console.log(`Found ${results.length} ${status} events`);
+    return results;
   }
 
   async createEvent(data: InsertEvent): Promise<Event> {

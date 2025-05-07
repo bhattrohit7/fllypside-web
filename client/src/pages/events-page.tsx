@@ -19,7 +19,16 @@ export default function EventsPage() {
   
   // Fetch events based on the active tab
   const { data: events, isLoading } = useQuery({
-    queryKey: ["/api/events", activeTab],
+    queryKey: ["/api/events", { status: activeTab }],
+    queryFn: async ({ queryKey }) => {
+      const [_, params] = queryKey;
+      const status = (params as any).status;
+      const response = await fetch(`/api/events?status=${status}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch events");
+      }
+      return response.json();
+    },
     enabled: !!businessPartner,
   });
 
