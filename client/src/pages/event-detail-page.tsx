@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users, DollarSign, Edit, Trash2, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -37,6 +38,12 @@ export default function EventDetailPage() {
   const { data: event, isLoading } = useQuery({
     queryKey: ['/api/events', eventId],
     queryFn: ({ queryKey }) => fetch(`/api/events/${queryKey[1]}`).then(res => res.json()),
+    enabled: !!eventId
+  });
+  
+  const { data: participants, isLoading: isParticipantsLoading } = useQuery({
+    queryKey: ['/api/events', eventId, 'participants'],
+    queryFn: ({ queryKey }) => fetch(`/api/events/${queryKey[1]}/participants`).then(res => res.json()),
     enabled: !!eventId
   });
 
@@ -181,7 +188,6 @@ export default function EventDetailPage() {
               
               {event.price > 0 ? (
                 <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg px-4 py-3 inline-flex items-center shadow-sm">
-                  <DollarSign className="h-5 w-5 text-green-600 mr-2" />
                   <span className="text-green-800 font-semibold">
                     Price: {getCurrencySymbol(event.currency)}{event.price}
                   </span>
@@ -237,6 +243,49 @@ export default function EventDetailPage() {
                 </div>
               </div>
             </div>
+          </Card>
+          
+          {/* Participants section */}
+          <Card className="p-6 shadow-md mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Registered Participants</h3>
+              <Badge className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                {event.currentParticipants} Total
+              </Badge>
+            </div>
+            
+            {isParticipantsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center space-x-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : participants && participants.length > 0 ? (
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                {participants.map((participant: any) => (
+                  <div key={participant.id} className="flex items-center p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-base font-medium mr-3">
+                      {participant.firstName?.charAt(0)}{participant.lastName?.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="font-medium">{participant.firstName} {participant.lastName}</div>
+                      <div className="text-sm text-gray-500">{participant.email || participant.phone}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Users className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-500">No participants have registered yet</p>
+              </div>
+            )}
           </Card>
         </div>
       </div>
