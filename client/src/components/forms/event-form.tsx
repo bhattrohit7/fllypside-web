@@ -29,8 +29,26 @@ import { format } from "date-fns";
 const eventFormSchema = z.object({
   name: z.string().min(1, "Event name is required"),
   description: z.string().optional(),
-  startDateTime: z.string().min(1, "Start date and time is required"),
-  endDateTime: z.string().min(1, "End date and time is required"),
+  startDateTime: z.string()
+    .min(1, "Start date and time is required")
+    .refine((date) => {
+      // Only validate past dates if it's not a draft (for non-draft events)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const startDate = new Date(date);
+      return startDate >= today;
+    }, "Events cannot be created for past dates"),
+  endDateTime: z.string()
+    .min(1, "End date and time is required")
+    .refine((date, ctx) => {
+      const startDate = ctx.path.includes("endDateTime") ? new Date(ctx.data.startDateTime || '') : undefined;
+      const endDate = new Date(date);
+      
+      if (startDate && endDate <= startDate) {
+        return false;
+      }
+      return true;
+    }, "End date must be after the start date"),
   maxParticipants: z.coerce.number().positive().default(50),
   price: z.coerce.number().min(0).default(0),
   location: z.string().optional(),
