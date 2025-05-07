@@ -581,6 +581,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For demonstration purposes, we'll return mock analytics data
       // In a real application, this would be calculated from actual data
+      
+      // Use the business partner's preferred currency or default to INR
+      const currency = businessPartner.preferredCurrency || 'INR';
+      
       const analyticsData = {
         participants: {
           total: 384,
@@ -596,7 +600,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         revenue: {
           total: 8245,
-          growth: 12
+          growth: 12,
+          currency: currency
         },
         charts: {
           participantTrends: [
@@ -622,7 +627,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             date: "June 15, 2023",
             participants: 78,
             attendanceRate: 98,
-            revenue: 3120
+            revenue: 3120,
+            currency: currency
           },
           {
             id: 2,
@@ -630,7 +636,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             date: "May 28, 2023",
             participants: 46,
             attendanceRate: 92,
-            revenue: 1150
+            revenue: 1150,
+            currency: currency
           },
           {
             id: 3,
@@ -638,7 +645,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             date: "July 3, 2023",
             participants: 62,
             attendanceRate: 90,
-            revenue: 2480
+            revenue: 2480,
+            currency: currency
           }
         ]
       };
