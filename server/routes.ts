@@ -6,6 +6,7 @@ import { dbStorage } from "./storage-db";
 import { z } from "zod";
 import { insertBusinessPartnerSchema, insertEventSchema, insertOfferSchema } from "@shared/schema";
 import { format, subMonths, addDays } from "date-fns";
+import { sendEventInvitation } from "./utils/sendgrid";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -789,6 +790,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Email sharing endpoint
+  app.post("/api/events/:id/share", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      
+      // Validate request body
+      if (!req.body.to || !req.body.from) {
+        return res.status(400).json({ 
+          message: "Missing required fields: 'to' and 'from' email addresses are required" 
+        });
+      }
+      
+      // Get the event details
+      const event = await storage.getEvent(eventId);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      // Format the date for email
+      const formatEventDate = (startDate: Date, endDate?: Date) => {
+        const start = new Date(startDate);
+        const options: Intl.DateTimeFormatOptions = { 
+          month: 'long', 
+          day: 'numeric', 
+          year: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric'
+        };
+        
+        let dateStr = start.toLocaleDateString('en-US', options);
+        
+        if (endDate) {
+          const end = new Date(endDate);
+          // If same day, just show different time
+          if (start.toDateString() === end.toDateString()) {
+            dateStr += ` - ${end.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric' })}`;
+          } else {
+            dateStr += ` - ${end.toLocaleDateString('en-US', options)}`;
+          }
+        }
+        
+        return dateStr;
+      };
+      
+      // Construct the event URL
+      const eventUrl = `${req.protocol}://${req.get('host')}/events/${eventId}`;
+      
+      // Send the invitation
+      const result = await sendEventInvitation({
+        to: req.body.to,
+        from: req.body.from,
+        eventName: event.name,
+        eventDate: formatEventDate(event.startDate, event.endDate),
+        eventLocation: event.location || 'TBD',
+        eventUrl,
+        personalMessage: req.body.message
+      });
+      
+      if (result.success) {
+        res.status(200).json({ message: "Invitation sent successfully" });
+      } else {
+        // Still return 200 but with a notice that email was not sent
+        res.status(200).json({ 
+          message: "Invitation could not be sent via email but sharing links are available",
+          emailSent: false,
+          error: result.message
+        });
+      }
+    } catch (error) {
+      console.error("Error sharing event:", error);
+      res.status(500).json({ message: "Failed to share event", error: String(error) });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

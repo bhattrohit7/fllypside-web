@@ -1,20 +1,23 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { Loader2, Mail, Share2, CopyCheck, Copy, Link } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
   DialogDescription, 
   DialogFooter, 
   DialogHeader, 
-  DialogTitle,
-  DialogTrigger
+  DialogTitle, 
+  DialogTrigger 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ToastAction } from "@/components/ui/toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Mail, Twitter, Facebook, Linkedin, Link as LinkIcon } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/lib/auth";
 
 interface ShareDialogProps {
   title: string;
@@ -22,181 +25,247 @@ interface ShareDialogProps {
   url: string;
   image?: string;
   trigger: React.ReactNode;
+  eventId: number;
 }
 
-export function ShareDialog({ title, description, url, image, trigger }: ShareDialogProps) {
+export function ShareDialog({ title, description, url, image, trigger, eventId }: ShareDialogProps) {
   const { toast } = useToast();
-  const [emailTo, setEmailTo] = useState('');
-  const [emailMessage, setEmailMessage] = useState(`Check out this event: ${title}`);
-  const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const [open, setOpen] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
+  const [recipient, setRecipient] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
   
-  // Function to handle copying to clipboard
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(url).then(() => {
+  const copyTimeout = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      copyTimeout();
       toast({
-        title: "Link copied to clipboard",
-        description: "You can now paste the link wherever you want",
-        action: (
-          <ToastAction altText="Close">Close</ToastAction>
-        ),
+        title: "Link Copied",
+        description: "Event link has been copied to your clipboard",
       });
-    }).catch(() => {
+    } catch (error) {
       toast({
-        title: "Failed to copy",
-        description: "Permission denied. Please try again.",
+        title: "Copy Failed",
+        description: "Could not copy to clipboard. Try again.",
         variant: "destructive",
       });
-    });
+    }
   };
-  
-  // Function to handle email sharing
-  const handleEmailShare = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!emailTo) {
+
+  const shareEmail = useMutation({
+    mutationFn: async (data: { to: string; from: string; message?: string }) => {
+      const res = await apiRequest("POST", `/api/events/${eventId}/share`, data);
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      if (data.emailSent === false) {
+        // Email couldn't be sent but we have fallback options
+        toast({
+          title: "Email not sent",
+          description: data.message || "Email could not be sent. Try sharing the link directly.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Invitation Sent",
+          description: "Your event invitation has been sent successfully.",
+        });
+      }
+      setOpen(false);
+      setRecipient("");
+      setMessage("");
+    },
+    onError: (error: Error) => {
       toast({
-        title: "Email required",
-        description: "Please enter an email address",
+        title: "Sharing Failed",
+        description: error.message || "Failed to share event. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleShareViaEmail = () => {
+    if (!recipient) {
+      toast({
+        title: "Email Required",
+        description: "Please enter a recipient email address",
         variant: "destructive",
       });
       return;
     }
-    
-    const emailSubject = encodeURIComponent(`Invitation: ${title}`);
-    const emailBody = encodeURIComponent(emailMessage);
-    
-    window.open(`mailto:${emailTo}?subject=${emailSubject}&body=${emailBody}%0A%0A${encodeURIComponent(url)}`);
-    
-    toast({
-      title: "Email client opened",
-      description: "An email has been drafted with your invitation",
+
+    // Get sender email - either from businessPartner or user or use default email
+    const fromEmail = user?.email || "noreply@flypside.com";
+
+    shareEmail.mutate({
+      to: recipient,
+      from: fromEmail,
+      message: message || undefined,
     });
-    
-    // Reset form
-    setEmailTo('');
-    setEmailMessage(`Check out this event: ${title}`);
+  };
+
+  const handleSocialShare = (platform: 'facebook' | 'twitter' | 'linkedin') => {
+    let shareUrl = '';
+    const encodedUrl = encodeURIComponent(url);
+    const encodedTitle = encodeURIComponent(title);
+    const encodedDesc = encodeURIComponent(description || '');
+
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+        break;
+    }
+
+    // Open in a new window
+    window.open(shareUrl, '_blank', 'width=600,height=400');
     setOpen(false);
-  };
-  
-  // Share on social media functions
-  const shareOnTwitter = () => {
-    const text = encodeURIComponent(`Check out this event: ${title} ${url}`);
-    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
-  };
-  
-  const shareOnFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-  };
-  
-  const shareOnLinkedIn = () => {
-    const summary = encodeURIComponent(`Check out this event: ${title}`);
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&summary=${summary}`, '_blank');
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share this event</DialogTitle>
-          <DialogDescription>
-            Invite others to this event through different channels
+          <DialogTitle className="text-center">Share Event</DialogTitle>
+          <DialogDescription className="text-center">
+            Share this event with your network
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="grid gap-6 py-4">
-          <div className="flex items-center space-x-2">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="link" className="sr-only">
-                Event Link
-              </Label>
-              <Input
-                id="link"
-                value={url}
-                readOnly
-                className="bg-gray-50"
+
+        <Tabs defaultValue="link" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="link">
+              <Link className="mr-2 h-4 w-4" />
+              Link
+            </TabsTrigger>
+            <TabsTrigger value="email">
+              <Mail className="mr-2 h-4 w-4" />
+              Email
+            </TabsTrigger>
+            <TabsTrigger value="social">
+              <Share2 className="mr-2 h-4 w-4" />
+              Social
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="link" className="space-y-4 py-4">
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="link">Event Link</Label>
+              <div className="flex items-center space-x-2">
+                <Input 
+                  id="link" 
+                  value={url} 
+                  readOnly 
+                  className="flex-1"
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={copyToClipboard}
+                >
+                  {copied ? <CopyCheck className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="email" className="space-y-4 py-4">
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="recipient">Recipient Email</Label>
+              <Input 
+                id="recipient" 
+                type="email"
+                placeholder="colleague@company.com"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
               />
             </div>
+            
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="message">Personal Message (Optional)</Label>
+              <Textarea 
+                id="message" 
+                placeholder="I thought you might be interested in this event..."
+                className="min-h-[100px]"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+            </div>
+            
             <Button 
               type="button" 
-              size="sm" 
-              variant="outline" 
-              className="px-3 flex-shrink-0"
-              onClick={copyToClipboard}
+              className="w-full"
+              onClick={handleShareViaEmail}
+              disabled={shareEmail.isPending}
             >
-              <span className="sr-only">Copy</span>
-              <Copy className="h-4 w-4" />
+              {shareEmail.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="mr-2 h-4 w-4" />
+                  Send Invitation
+                </>
+              )}
             </Button>
-          </div>
+          </TabsContent>
           
-          {/* Social Media Sharing */}
-          <div className="space-y-2">
-            <Label>Share on social media</Label>
-            <div className="flex space-x-2">
+          <TabsContent value="social" className="space-y-4 py-4">
+            <div className="grid grid-cols-3 gap-4">
               <Button 
-                type="button" 
                 variant="outline" 
-                size="sm" 
-                className="flex-1 flex items-center justify-center bg-[#1DA1F2] text-white hover:bg-[#1a94df] border-none"
-                onClick={shareOnTwitter}
+                className="flex flex-col items-center justify-center gap-2 p-6"
+                onClick={() => handleSocialShare('facebook')}
               >
-                <Twitter className="h-4 w-4 mr-2" />
-                <span>Twitter</span>
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                className="flex-1 flex items-center justify-center bg-[#3b5998] text-white hover:bg-[#344e86] border-none"
-                onClick={shareOnFacebook}
-              >
-                <Facebook className="h-4 w-4 mr-2" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
                 <span>Facebook</span>
               </Button>
+              
               <Button 
-                type="button" 
                 variant="outline" 
-                size="sm" 
-                className="flex-1 flex items-center justify-center bg-[#0077b5] text-white hover:bg-[#006da7] border-none"
-                onClick={shareOnLinkedIn}
+                className="flex flex-col items-center justify-center gap-2 p-6"
+                onClick={() => handleSocialShare('twitter')}
               >
-                <Linkedin className="h-4 w-4 mr-2" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-twitter"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+                <span>Twitter</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="flex flex-col items-center justify-center gap-2 p-6"
+                onClick={() => handleSocialShare('linkedin')}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
                 <span>LinkedIn</span>
               </Button>
             </div>
-          </div>
-          
-          {/* Email Sharing Form */}
-          <form onSubmit={handleEmailShare} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Share via Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="recipient@example.com"
-                value={emailTo}
-                onChange={(e) => setEmailTo(e.target.value)}
-                className="bg-gray-50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="message">Message (optional)</Label>
-              <Textarea
-                id="message"
-                placeholder="Add a personal message..."
-                value={emailMessage}
-                onChange={(e) => setEmailMessage(e.target.value)}
-                className="bg-gray-50"
-              />
-            </div>
-            <Button type="submit" className="w-full flex items-center justify-center">
-              <Mail className="h-4 w-4 mr-2" />
-              <span>Send Email Invitation</span>
-            </Button>
-          </form>
-        </div>
+          </TabsContent>
+        </Tabs>
+
+        <DialogFooter className="sm:justify-center">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setOpen(false)}
+          >
+            Close
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
