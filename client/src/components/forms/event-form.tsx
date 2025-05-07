@@ -56,7 +56,7 @@ const eventFormSchema = z.object({
   requireIdVerification: z.boolean().optional().default(false),
   currency: z.enum(["INR", "USD", "EUR", "GBP", "AUD"]).default("INR"),
   offerId: z.string().optional(),
-  draftMode: z.boolean().default(false),
+  // draftMode removed as requested
   bannerImage: z.any().optional(),
 });
 
@@ -95,7 +95,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
       price: existingData?.price || 0,
       requireIdVerification: existingData?.requireIdVerification || false,
       location: existingData?.location || "",
-      draftMode: false,
+      // draftMode removed
       offerId: existingData?.offerId || "",
       currency: existingData?.currency || "INR",
     }
@@ -199,7 +199,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
         currency: values.currency,
         requireIdVerification: Boolean(values.requireIdVerification),
         location: values.location || "",
-        draftMode: Boolean(values.draftMode)
+        draftMode: false // Always false since we're removing draft functionality
       };
       
       // Add offer ID if selected
@@ -596,15 +596,6 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
             </div>
           </CardContent>
           <CardFooter className="px-4 py-3 bg-gray-50 text-right sm:px-6 flex justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={saveDraft}
-              disabled={isSubmitting}
-              className="mr-3"
-            >
-              Save as Draft
-            </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting}
