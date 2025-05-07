@@ -3,47 +3,53 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 20 14.3% 4.1%;
-  --muted: 60 4.8% 95.9%;
-  --muted-foreground: 25 5.3% 44.7%;
+  /* Modern color palette for Flypside */
+  --background: 220 25% 97%;
+  --foreground: 224 71% 4%;
+  --muted: 220 20% 94%;
+  --muted-foreground: 220 5% 40%;
   --popover: 0 0% 100%;
-  --popover-foreground: 20 14.3% 4.1%;
+  --popover-foreground: 224 71% 4%;
   --card: 0 0% 100%;
-  --card-foreground: 20 14.3% 4.1%;
-  --border: 20 5.9% 90%;
-  --input: 20 5.9% 90%;
-  --primary: 207 90% 54%;
-  --primary-foreground: 211 100% 99%;
-  --secondary: 152 60% 38%;
-  --secondary-foreground: 24 9.8% 10%;
-  --accent: 262 58% 64%;
-  --accent-foreground: 24 9.8% 10%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 60 9.1% 97.8%;
-  --success: 152 60% 38%;
+  --card-foreground: 224 71% 4%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  
+  /* Brand colors */
+  --primary: 230 80% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 262 83% 58%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 330 85% 55%;
+  --accent-foreground: 0 0% 100%;
+  
+  /* System colors */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --success: 160 84% 39%;
   --success-foreground: 0 0% 100%;
-  --warning: 32 81% 52%;
+  --warning: 31 92% 58%;
   --warning-foreground: 0 0% 100%;
-  --ring: 20 14.3% 4.1%;
-  --radius: 0.5rem;
   
-  /* Dashboard chart colors */
-  --chart-1: 207 90% 54%;
-  --chart-2: 152 60% 38%;
-  --chart-3: 262 58% 64%;
-  --chart-4: 32 81% 52%;
-  --chart-5: 0 84.2% 60.2%;
+  --ring: 230 80% 50%;
+  --radius: 0.75rem;
   
-  /* Sidebar theme */
-  --sidebar-background: 225 15% 16%;
-  --sidebar-foreground: 0 0% 98%;
-  --sidebar-primary: 207 90% 54%;
+  /* Dashboard chart colors - more vibrant */
+  --chart-1: 230 80% 55%;
+  --chart-2: 160 84% 39%;
+  --chart-3: 262 83% 58%;
+  --chart-4: 31 92% 58%;
+  --chart-5: 330 85% 55%;
+  
+  /* Sidebar theme - darker and more dramatic */
+  --sidebar-background: 225 30% 12%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-primary: 230 80% 55%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 225 25% 35%;
+  --sidebar-accent: 262 83% 58%;
   --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-border: 225 12% 25%;
-  --sidebar-ring: 224 8% 80%;
+  --sidebar-border: 225 25% 25%;
+  --sidebar-ring: 220 60% 80%;
   --sidebar-text: 0 0% 100%;
 }
 
@@ -113,6 +119,50 @@
 }
 
 @layer components {
+  /* Custom animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes slideInRight {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(var(--primary), 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(var(--primary), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--primary), 0); }
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease-out forwards;
+  }
+  
+  .animate-slide-in {
+    animation: slideInRight 0.5s ease-out forwards;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulseGlow 2s infinite;
+  }
+  
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.2s; }
+  .stagger-5 { animation-delay: 0.25s; }
+  
   /* Sidebar styling */
   .sidebar {
     @apply bg-gray-900 text-white border-r border-gray-800 shadow-xl transition-all duration-300;
@@ -161,17 +211,35 @@
     @apply p-6 rounded-2xl border border-gray-100 shadow-md bg-gradient-to-br from-white to-gray-50 hover:shadow-lg transition-all duration-300;
   }
   
-  /* Button styling */
+  /* Enhanced card styling with subtle gradient */
+  .card-gradient {
+    @apply bg-gradient-to-br from-white via-white to-gray-50;
+  }
+  
+  /* Glass morphism effect for premium elements */
+  .glass-card {
+    @apply bg-white bg-opacity-70 backdrop-blur-lg border border-white border-opacity-20 shadow-xl;
+  }
+  
+  /* Modern button styling */
   .btn {
-    @apply rounded-xl font-medium shadow-sm hover:shadow transition-all duration-200;
+    @apply rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200;
   }
   
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98];
+    @apply bg-gradient-to-r from-primary to-primary/90 text-white hover:from-primary/95 hover:to-primary hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98];
   }
   
   .btn-secondary {
-    @apply bg-secondary text-white hover:bg-secondary/90 hover:scale-[1.02] active:scale-[0.98];
+    @apply bg-gradient-to-r from-secondary to-secondary/90 text-white hover:from-secondary/95 hover:to-secondary hover:shadow-secondary/20 hover:scale-[1.02] active:scale-[0.98];
+  }
+  
+  .btn-accent {
+    @apply bg-gradient-to-r from-accent to-accent/90 text-white hover:from-accent/95 hover:to-accent hover:shadow-accent/20 hover:scale-[1.02] active:scale-[0.98];
+  }
+  
+  .btn-outline {
+    @apply border-2 bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:text-primary hover:border-primary/50 hover:shadow-sm;
   }
   
   /* Form elements */

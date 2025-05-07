@@ -77,10 +77,10 @@ export default function DashboardPage() {
                   ) : (
                     <>
                       {/* Total events */}
-                      <Card className="stats-card overflow-hidden">
+                      <Card className="stats-card card-gradient overflow-hidden animate-scale-in">
                         <CardContent className="px-5 py-6">
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-gradient-to-br from-primary to-primary/80 rounded-xl p-3 shadow-md">
+                            <div className="flex-shrink-0 bg-gradient-to-br from-primary to-primary/80 rounded-xl p-3 shadow-md animate-pulse-glow">
                               <Calendar className="h-5 w-5 text-white" />
                             </div>
                             <div className="ml-5 w-0 flex-1">
@@ -93,15 +93,15 @@ export default function DashboardPage() {
                             </div>
                           </div>
                         </CardContent>
-                        <CardFooter className="bg-gray-50 px-5 py-4 rounded-b-xl border-t border-gray-100">
-                          <Link href="/events" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200">
+                        <CardFooter className="bg-gray-50/80 px-5 py-4 rounded-b-xl border-t border-gray-100">
+                          <Link href="/events" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200 group flex items-center">
                             View all events <span aria-hidden="true" className="ml-1 transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
                           </Link>
                         </CardFooter>
                       </Card>
                       
                       {/* Active offers */}
-                      <Card className="stats-card overflow-hidden">
+                      <Card className="stats-card card-gradient overflow-hidden animate-scale-in stagger-1">
                         <CardContent className="px-5 py-6">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 bg-gradient-to-br from-secondary to-secondary/80 rounded-xl p-3 shadow-md">
