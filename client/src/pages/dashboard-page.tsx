@@ -152,19 +152,19 @@ export default function DashboardPage() {
                 </div>
                 
                 {/* Recent Activity */}
-                <div className="mt-6">
-                  <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
+                <div className="mt-8">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
                   
-                  <Card>
-                    <ul role="list" className="divide-y divide-gray-200">
+                  <Card className="overflow-hidden">
+                    <ul role="list" className="divide-y divide-gray-100">
                       {isActivitiesLoading ? (
                         Array(3).fill(0).map((_, i) => (
-                          <li key={i} className="px-4 py-4">
+                          <li key={i} className="px-5 py-5">
                             <div className="flex items-center justify-between">
                               <Skeleton className="h-5 w-32" />
                               <Skeleton className="h-5 w-20" />
                             </div>
-                            <div className="mt-2 flex justify-between">
+                            <div className="mt-3 flex justify-between">
                               <div className="flex">
                                 <Skeleton className="h-4 w-24 mr-6" />
                                 <Skeleton className="h-4 w-24" />
@@ -175,43 +175,45 @@ export default function DashboardPage() {
                         ))
                       ) : activities && activities.length > 0 ? (
                         activities.map((activity: any, index: number) => (
-                          <li key={index}>
-                            <Link href={activity.link || "#"} className="block hover:bg-gray-50">
-                              <div className="px-4 py-4 sm:px-6">
+                          <li key={index} className="group transition-colors duration-200">
+                            <Link href={activity.link || "#"} className="block hover:bg-gray-50/70">
+                              <div className="px-5 py-5 sm:px-6">
                                 <div className="flex items-center justify-between">
-                                  <p className="text-sm font-medium text-primary truncate">
+                                  <p className="text-sm font-medium text-primary group-hover:text-primary/80 truncate transition-colors duration-200">
                                     {activity.title}
                                   </p>
                                   <div className="ml-2 flex-shrink-0 flex">
-                                    <p className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                      ${activity.status === 'Upcoming' ? 'bg-green-100 text-green-800' : 
-                                        activity.status === 'Offer Active' ? 'bg-yellow-100 text-yellow-800' : 
-                                        'bg-gray-100 text-gray-800'}`}>
+                                    <p className={`px-3 py-1 inline-flex text-xs leading-5 font-medium rounded-full shadow-sm
+                                      ${activity.status === 'Upcoming' 
+                                        ? 'bg-gradient-to-r from-green-50 to-green-100 text-green-800 border border-green-200' 
+                                        : activity.status === 'Offer Active' 
+                                          ? 'bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-800 border border-yellow-200' 
+                                          : 'bg-gradient-to-r from-gray-50 to-gray-100 text-gray-800 border border-gray-200'}`}>
                                       {activity.status}
                                     </p>
                                   </div>
                                 </div>
-                                <div className="mt-2 sm:flex sm:justify-between">
+                                <div className="mt-3 sm:flex sm:justify-between">
                                   <div className="sm:flex">
-                                    <p className="flex items-center text-sm text-gray-500">
+                                    <p className="flex items-center text-sm text-gray-600">
                                       {activity.type === 'event' ? (
-                                        <Calendar className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                                        <Calendar className="flex-shrink-0 mr-2 h-4 w-4 text-primary/70" />
                                       ) : (
-                                        <Tag className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                                        <Tag className="flex-shrink-0 mr-2 h-4 w-4 text-secondary/70" />
                                       )}
                                       {activity.primaryInfo}
                                     </p>
-                                    <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                                    <p className="mt-2 flex items-center text-sm text-gray-600 sm:mt-0 sm:ml-6">
                                       {activity.type === 'event' ? (
-                                        <Users className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                                        <Users className="flex-shrink-0 mr-2 h-4 w-4 text-primary/70" />
                                       ) : (
-                                        <DollarSign className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                                        <DollarSign className="flex-shrink-0 mr-2 h-4 w-4 text-secondary/70" />
                                       )}
                                       {activity.secondaryInfo}
                                     </p>
                                   </div>
-                                  <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                    <Clock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                                  <div className="mt-2 flex items-center text-sm text-gray-600 sm:mt-0">
+                                    <Clock className="flex-shrink-0 mr-2 h-4 w-4 text-gray-500" />
                                     <p>{activity.timeInfo}</p>
                                   </div>
                                 </div>
@@ -220,8 +222,11 @@ export default function DashboardPage() {
                           </li>
                         ))
                       ) : (
-                        <li className="px-4 py-6 text-center text-gray-500">
-                          No recent activity to display.
+                        <li className="px-5 py-6 text-center text-gray-500">
+                          <div className="flex flex-col items-center justify-center py-4">
+                            <Activity className="h-8 w-8 text-gray-300 mb-2" />
+                            <p className="text-gray-500">No recent activity to display.</p>
+                          </div>
                         </li>
                       )}
                     </ul>
