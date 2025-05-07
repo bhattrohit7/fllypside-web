@@ -59,8 +59,10 @@ export default function EventDetailPage() {
   const { id } = useParams();
   const { toast } = useToast();
   const eventId = Number(id);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState("");
 
-  const { data: event, isLoading } = useQuery({
+  const { data: event, isLoading, refetch } = useQuery({
     queryKey: ['/api/events', eventId],
     queryFn: ({ queryKey }) => fetch(`/api/events/${queryKey[1]}`).then(res => res.json()),
     enabled: !!eventId
@@ -92,11 +94,56 @@ export default function EventDetailPage() {
       });
     }
   });
+  
+  const cancelMutation = useMutation({
+    mutationFn: async () => {
+      if (!cancellationReason.trim()) {
+        throw new Error("Cancellation reason is required");
+      }
+      
+      await apiRequest('POST', `/api/events/${eventId}/cancel`, { 
+        reason: cancellationReason 
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Event cancelled",
+        description: "The event has been cancelled successfully. Participants will be notified.",
+      });
+      setCancelDialogOpen(false);
+      setCancellationReason("");
+      refetch(); // Refresh event data to show cancelled status
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
       deleteMutation.mutate();
     }
+  };
+  
+  const handleCancelEvent = () => {
+    setCancelDialogOpen(true);
+  };
+  
+  // Check if event can be cancelled (created within the last 24 hours)
+  const canCancel = () => {
+    if (!event || event.status === 'cancelled') return false;
+    
+    const now = new Date();
+    const creationTime = new Date(event.createdAt);
+    const timeDifference = now.getTime() - creationTime.getTime();
+    const hoursDifference = timeDifference / (1000 * 60 * 60);
+    
+    return hoursDifference <= 24;
   };
 
   const formatDate = (dateString?: string) => {
@@ -182,11 +229,51 @@ export default function EventDetailPage() {
                   <span>Back to events</span>
                 </Link>
                 <div className="flex space-x-2">
+                  {/* Event Status Badge */}
+                  {event.status === 'cancelled' && (
+                    <div className="bg-red-100 border border-red-200 text-red-800 px-3 py-1 rounded-md flex items-center">
+                      <Ban className="h-4 w-4 mr-1" />
+                      <span className="font-medium">Cancelled</span>
+                    </div>
+                  )}
+                  
                   <Link href={`/events/${eventId}/edit`}>
-                    <Button variant="outline" size="sm" className="flex items-center">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center"
+                      disabled={event.status === 'cancelled'}
+                    >
                       <Edit className="h-4 w-4 mr-1" /> Edit
                     </Button>
                   </Link>
+                  
+                  {/* Cancel Button with Tooltip if needed */}
+                  {event.status !== 'cancelled' && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex items-center text-amber-600 border-amber-200 hover:bg-amber-50"
+                              onClick={handleCancelEvent}
+                              disabled={!canCancel()}
+                            >
+                              <Ban className="h-4 w-4 mr-1" /> Cancel
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
+                        {!canCancel() && (
+                          <TooltipContent className="max-w-xs">
+                            <p>Events can only be cancelled within 24 hours of creation</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  
                   <Button 
                     variant="destructive" 
                     size="sm" 
@@ -328,6 +415,59 @@ export default function EventDetailPage() {
           </main>
         </div>
       </div>
+
+      {/* Cancellation Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-red-600">
+              <AlertTriangle className="h-5 w-5 mr-2" />
+              Cancel Event
+            </DialogTitle>
+            <DialogDescription>
+              This action will cancel the event "{event?.name}" and notify all participants.
+              <div className="text-amber-600 font-medium mt-2 flex items-center">
+                <HelpCircle className="h-4 w-4 mr-1" />
+                <span>Please provide a reason for cancellation.</span>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-4 mb-5">
+            <Textarea
+              placeholder="Explain why this event is being cancelled..."
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              rows={4}
+              className="resize-none"
+            />
+          </div>
+          
+          <DialogFooter className="flex space-x-2 sm:justify-end">
+            <Button 
+              variant="outline" 
+              onClick={() => setCancelDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => cancelMutation.mutate()}
+              disabled={cancelMutation.isPending || !cancellationReason.trim()}
+              className="flex items-center"
+            >
+              {cancelMutation.isPending ? (
+                <>
+                  <span className="animate-spin h-4 w-4 mr-2 border-2 border-white border-opacity-20 border-t-white rounded-full" />
+                  Processing...
+                </>
+              ) : (
+                <>Cancel Event</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

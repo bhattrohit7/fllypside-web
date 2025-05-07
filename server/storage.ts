@@ -761,6 +761,25 @@ export class DatabaseStorage implements IStorage {
   async deleteEvent(id: number): Promise<void> {
     await db.delete(events).where(eq(events.id, id));
   }
+  
+  async cancelEvent(id: number, reason: string): Promise<Event> {
+    const [cancelledEvent] = await db
+      .update(events)
+      .set({
+        status: "cancelled",
+        cancellationReason: reason,
+        cancelledAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(events.id, id))
+      .returning();
+      
+    if (!cancelledEvent) {
+      throw new Error("Event not found");
+    }
+    
+    return cancelledEvent;
+  }
 
   // Offer methods
   async getOffer(id: number): Promise<Offer | undefined> {
