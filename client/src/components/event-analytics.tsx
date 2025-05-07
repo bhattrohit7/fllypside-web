@@ -66,24 +66,26 @@ const EventAnalytics: React.FC<EventAnalyticsProps> = ({ eventId }) => {
   }
 
   return (
-    <Card>
+    <Card className="card-gradient shadow-lg border-0">
       <CardContent className="p-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Event Performance</h3>
-          <span className="text-xs text-gray-500 flex items-center">
+          <h3 className="text-lg font-semibold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">Event Performance</h3>
+          <span className="text-xs text-gray-500 flex items-center bg-gray-50 px-2 py-1 rounded-full shadow-sm">
             <span className="animate-bounce inline-block mr-1">↓</span> Scroll for more
           </span>
         </div>
         
         <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 scroll-smooth">
           {/* Attendance Rate */}
-          <div>
+          <div className="bg-white/60 p-3 rounded-lg shadow-sm animate-fade-in">
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center">
-                <Users className="h-4 w-4 mr-2 text-blue-500" />
+                <div className="bg-blue-100 p-1.5 rounded-md mr-2">
+                  <Users className="h-4 w-4 text-blue-500" />
+                </div>
                 <span className="text-sm font-medium">Attendance Rate</span>
               </div>
-              <span className="text-sm font-bold">{eventAnalytics.attendanceRate || 0}%</span>
+              <span className="text-sm font-bold bg-blue-50 px-2 py-1 rounded-full">{eventAnalytics.attendanceRate || 0}%</span>
             </div>
             <Progress value={eventAnalytics.attendanceRate || 0} className="h-2" />
             <p className="text-xs text-gray-500 mt-1">
@@ -92,13 +94,15 @@ const EventAnalytics: React.FC<EventAnalyticsProps> = ({ eventId }) => {
           </div>
           
           {/* Registration Completion */}
-          <div>
+          <div className="bg-white/60 p-3 rounded-lg shadow-sm animate-fade-in stagger-1">
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center">
-                <Target className="h-4 w-4 mr-2 text-green-500" />
+                <div className="bg-green-100 p-1.5 rounded-md mr-2">
+                  <Target className="h-4 w-4 text-green-500" />
+                </div>
                 <span className="text-sm font-medium">Registration Goal</span>
               </div>
-              <span className="text-sm font-bold">{eventAnalytics.registrationRate || 0}%</span>
+              <span className="text-sm font-bold bg-green-50 px-2 py-1 rounded-full">{eventAnalytics.registrationRate || 0}%</span>
             </div>
             <Progress value={eventAnalytics.registrationRate || 0} className="h-2" />
             <p className="text-xs text-gray-500 mt-1">
@@ -108,33 +112,37 @@ const EventAnalytics: React.FC<EventAnalyticsProps> = ({ eventId }) => {
           
           {/* Revenue Analysis */}
           {eventAnalytics.isPaidEvent && (
-            <div>
+            <div className="bg-white/60 p-3 rounded-lg shadow-sm animate-fade-in stagger-2">
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center">
-                  <DollarSign className="h-4 w-4 mr-2 text-yellow-500" />
+                  <div className="bg-yellow-100 p-1.5 rounded-md mr-2">
+                    <DollarSign className="h-4 w-4 text-yellow-500" />
+                  </div>
                   <span className="text-sm font-medium">Revenue</span>
                 </div>
-                <span className="text-sm font-bold">
+                <span className="text-sm font-bold bg-yellow-50 px-2 py-1 rounded-full">
                   {getCurrencySymbol(businessPartner?.preferredCurrency || 'USD')}{eventAnalytics.totalRevenue || 0}
                 </span>
               </div>
-              <div className="mt-1 flex items-center justify-between text-xs text-gray-500">
-                <span>Average per participant: {getCurrencySymbol(businessPartner?.preferredCurrency || 'USD')}{eventAnalytics.averageRevenue || 0}</span>
-                <span>{eventAnalytics.totalParticipants || 0} paying participants</span>
+              <div className="mt-3 flex items-center justify-between text-xs p-2 bg-gray-50/60 rounded-md">
+                <span>Average per participant: <span className="font-medium">{getCurrencySymbol(businessPartner?.preferredCurrency || 'USD')}{eventAnalytics.averageRevenue || 0}</span></span>
+                <span className="bg-primary/10 px-2 py-1 rounded-full text-primary font-medium">{eventAnalytics.totalParticipants || 0} paying participants</span>
               </div>
             </div>
           )}
           
           {/* Demographics */}
           {eventAnalytics.demographics && (
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center">
-                <Map className="h-4 w-4 mr-2 text-indigo-500" />
-                Participant Demographics
-              </h4>
+            <div className="bg-white/60 p-3 rounded-lg shadow-sm animate-fade-in stagger-3">
+              <div className="flex items-center mb-3">
+                <div className="bg-indigo-100 p-1.5 rounded-md mr-2">
+                  <Map className="h-4 w-4 text-indigo-500" />
+                </div>
+                <h4 className="text-sm font-medium">Participant Demographics</h4>
+              </div>
               <div className="grid grid-cols-2 gap-2">
-                {Object.entries(eventAnalytics.demographics).map(([key, value]) => (
-                  <div key={key} className="bg-gray-50 rounded-md p-2">
+                {Object.entries(eventAnalytics.demographics).map(([key, value], index) => (
+                  <div key={key} className="bg-gray-50/60 rounded-md p-2 shadow-sm hover:shadow-md transition-shadow duration-300">
                     <div className="text-xs text-gray-500">{key}</div>
                     <div className="text-sm font-medium">{String(value)}%</div>
                   </div>
@@ -145,16 +153,18 @@ const EventAnalytics: React.FC<EventAnalyticsProps> = ({ eventId }) => {
           
           {/* Engagement Stats */}
           {eventAnalytics.engagement && (
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center">
-                <Calendar className="h-4 w-4 mr-2 text-pink-500" />
-                Engagement
-              </h4>
+            <div className="bg-white/60 p-3 rounded-lg shadow-sm animate-fade-in stagger-4">
+              <div className="flex items-center mb-3">
+                <div className="bg-pink-100 p-1.5 rounded-md mr-2">
+                  <Calendar className="h-4 w-4 text-pink-500" />
+                </div>
+                <h4 className="text-sm font-medium">Engagement Metrics</h4>
+              </div>
               <div className="grid grid-cols-3 gap-2">
-                {Object.entries(eventAnalytics.engagement).map(([key, value]) => (
-                  <div key={key} className="bg-gray-50 rounded-md p-2 text-center">
+                {Object.entries(eventAnalytics.engagement).map(([key, value], index) => (
+                  <div key={key} className="bg-gray-50/60 rounded-md p-2 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
                     <div className="text-xs text-gray-500">{key}</div>
-                    <div className="text-sm font-medium">{value}</div>
+                    <div className="text-sm font-medium text-pink-600">{String(value)}</div>
                   </div>
                 ))}
               </div>
