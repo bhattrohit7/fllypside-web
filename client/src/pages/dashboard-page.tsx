@@ -238,9 +238,9 @@ export default function DashboardPage() {
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
                   
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    <Link href="/events/create" className="block">
-                      <div className="card relative group px-6 py-6 flex items-center space-x-4 hover:border-primary/20 transition-all duration-300">
-                        <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-white shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
+                    <Link href="/events/create" className="block animate-scale-in">
+                      <div className="card-gradient card relative group px-6 py-6 flex items-center space-x-4 hover:border-primary/20 transition-all duration-300 hover:shadow-lg">
+                        <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-white shadow-md group-hover:shadow-primary/20 group-hover:scale-110 transition-all duration-300">
                           <Calendar className="h-6 w-6" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -255,9 +255,9 @@ export default function DashboardPage() {
                       </div>
                     </Link>
                     
-                    <Link href="/offers/create" className="block">
-                      <div className="card relative group px-6 py-6 flex items-center space-x-4 hover:border-secondary/20 transition-all duration-300">
-                        <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-secondary to-secondary/80 text-white shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
+                    <Link href="/offers/create" className="block animate-scale-in stagger-1">
+                      <div className="card-gradient card relative group px-6 py-6 flex items-center space-x-4 hover:border-secondary/20 transition-all duration-300 hover:shadow-lg">
+                        <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-secondary to-secondary/80 text-white shadow-md group-hover:shadow-secondary/20 group-hover:scale-110 transition-all duration-300">
                           <Tag className="h-6 w-6" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -272,9 +272,9 @@ export default function DashboardPage() {
                       </div>
                     </Link>
                     
-                    <Link href="/profile" className="block">
-                      <div className="card relative group px-6 py-6 flex items-center space-x-4 hover:border-accent/20 transition-all duration-300">
-                        <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-accent to-accent/80 text-white shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
+                    <Link href="/profile" className="block animate-scale-in stagger-2">
+                      <div className="card-gradient card relative group px-6 py-6 flex items-center space-x-4 hover:border-accent/20 transition-all duration-300 hover:shadow-lg">
+                        <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-accent to-accent/80 text-white shadow-md group-hover:shadow-accent/20 group-hover:scale-110 transition-all duration-300">
                           <Edit className="h-6 w-6" />
                         </div>
                         <div className="flex-1 min-w-0">
