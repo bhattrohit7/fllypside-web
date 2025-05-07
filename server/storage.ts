@@ -414,11 +414,18 @@ export class MemStorage implements IStorage {
         }
         
         if (status === "upcoming") {
-          // Upcoming events: published events (not drafts) with future start dates
-          return event.draftMode === false && isAfter(new Date(event.startDate), now);
+          // Upcoming events: published events (not drafts) with future start dates that aren't cancelled
+          return event.draftMode === false && 
+                 isAfter(new Date(event.startDate), now) &&
+                 event.status === "active";
         } else if (status === "past") {
-          // Past events: published events (not drafts) with past end dates
-          return event.draftMode === false && isBefore(new Date(event.endDate), now);
+          // Past events: published events (not drafts) with past end dates that aren't cancelled
+          return event.draftMode === false && 
+                 isBefore(new Date(event.endDate), now) &&
+                 event.status === "active";
+        } else if (status === "cancelled") {
+          // Cancelled events: specifically marked as cancelled regardless of dates
+          return event.status === "cancelled";
         } else if (status === "draft") {
           // Draft events: specifically marked as drafts regardless of dates
           return event.draftMode === true;
@@ -717,11 +724,12 @@ export class DatabaseStorage implements IStorage {
         )
       );
     } else if (status === "past") {
-      // Past events: end date in the past, not a draft
+      // Past events: end date in the past, not a draft, not cancelled
       query = query.where(
         and(
           lt(events.endDate, now),
-          eq(events.draftMode, false)
+          eq(events.draftMode, false),
+          eq(events.status, "active")
         )
       );
     } else if (status === "cancelled") {
