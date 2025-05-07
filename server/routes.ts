@@ -334,6 +334,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Event cancellation endpoint
+  app.post("/api/events/:id/cancel", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      const { reason } = req.body;
+      
+      if (!reason) {
+        return res.status(400).json({ message: "Cancellation reason is required" });
+      }
+      
+      // Get business partner for the user
+      const businessPartner = await storage.getBusinessPartnerByUserId(userId);
+      
+      if (!businessPartner) {
+        return res.status(400).json({ message: "Business partner profile not found" });
+      }
+      
+      // Make sure the event belongs to the business partner
+      const existingEvent = await storage.getEvent(eventId);
+      if (!existingEvent || existingEvent.hostId !== businessPartner.id) {
+        return res.status(403).json({ message: "Not authorized to cancel this event" });
+      }
+      
+      // Check if event was created within the last 24 hours
+      const now = new Date();
+      const eventCreationTime = new Date(existingEvent.createdAt);
+      const timeDifference = now.getTime() - eventCreationTime.getTime();
+      const hoursDifference = timeDifference / (1000 * 60 * 60);
+      
+      if (hoursDifference > 24) {
+        return res.status(400).json({ 
+          message: "Events can only be cancelled within 24 hours of creation",
+          hoursElapsed: Math.round(hoursDifference)
+        });
+      }
+      
+      // Cancel the event
+      const cancelledEvent = await storage.cancelEvent(eventId, reason);
+      
+      // Return success
+      res.status(200).json({
+        message: "Event cancelled successfully",
+        event: cancelledEvent
+      });
+    } catch (error) {
+      console.error("Error cancelling event:", error);
+      res.status(500).json({ message: "Failed to cancel event", error: String(error) });
+    }
+  });
+  
   // Offer routes
   app.get("/api/offers", async (req, res) => {
     try {

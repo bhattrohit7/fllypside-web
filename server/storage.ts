@@ -500,6 +500,24 @@ export class MemStorage implements IStorage {
       }
     }
   }
+  
+  async cancelEvent(id: number, reason: string): Promise<Event> {
+    const event = this.events.get(id);
+    if (!event) {
+      throw new Error("Event not found");
+    }
+    
+    const updatedEvent: Event = {
+      ...event,
+      status: "cancelled",
+      cancellationReason: reason,
+      cancelledAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.events.set(id, updatedEvent);
+    return updatedEvent;
+  }
 
   // Offer methods
   async getOffer(id: number): Promise<Offer | undefined> {

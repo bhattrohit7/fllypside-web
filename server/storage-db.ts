@@ -224,6 +224,27 @@ export class DatabaseStorage {
   async deleteEvent(id: number): Promise<void> {
     await db.delete(events).where(eq(events.id, id));
   }
+  
+  async cancelEvent(id: number, reason: string): Promise<Event> {
+    const now = new Date();
+    
+    const [updatedEvent] = await db
+      .update(events)
+      .set({
+        status: "cancelled",
+        cancellationReason: reason,
+        cancelledAt: now,
+        updatedAt: now
+      })
+      .where(eq(events.id, id))
+      .returning();
+    
+    if (!updatedEvent) {
+      throw new Error("Event not found or could not be cancelled");
+    }
+    
+    return updatedEvent;
+  }
 
   // Offer methods
   async getOffer(id: number): Promise<Offer | undefined> {

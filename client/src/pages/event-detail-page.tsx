@@ -1,16 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, MapPin, Users, DollarSign, Edit, Trash2, ArrowLeft } from "lucide-react";
+import { 
+  Calendar, 
+  MapPin, 
+  Users, 
+  Edit, 
+  Trash2, 
+  ArrowLeft, 
+  AlertTriangle,
+  Ban,
+  HelpCircle
+} from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import EventAnalytics from "@/components/event-analytics";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Textarea } from "@/components/ui/textarea";
 
 // Helper function to get currency symbol
 const getCurrencySymbol = (currency?: string): string => {
