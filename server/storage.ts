@@ -50,7 +50,7 @@ export interface IStorage {
   getOffer(id: number): Promise<Offer | undefined>;
   getOffersByBusinessPartnerId(businessPartnerId: number, status: string): Promise<Offer[]>;
   createOffer(data: InsertOffer): Promise<Offer>;
-  updateOffer(id: number, data: InsertOffer): Promise<Offer>;
+  updateOffer(id: number, data: Partial<Offer>): Promise<Offer>;
   deleteOffer(id: number): Promise<void>;
   linkOfferToAllEvents(offerId: number, businessPartnerId: number): Promise<void>;
 
@@ -547,7 +547,7 @@ export class MemStorage implements IStorage {
     return offer;
   }
 
-  async updateOffer(id: number, data: InsertOffer): Promise<Offer> {
+  async updateOffer(id: number, data: Partial<Offer>): Promise<Offer> {
     const existingOffer = await this.getOffer(id);
     
     if (!existingOffer) {
@@ -773,7 +773,7 @@ export class DatabaseStorage implements IStorage {
     return offer;
   }
 
-  async updateOffer(id: number, data: InsertOffer): Promise<Offer> {
+  async updateOffer(id: number, data: Partial<Offer>): Promise<Offer> {
     const [offer] = await db
       .update(offers)
       .set(data)
