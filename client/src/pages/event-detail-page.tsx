@@ -10,7 +10,6 @@ import {
   MapPin, 
   Users, 
   Edit, 
-  Trash2, 
   ArrowLeft, 
   AlertTriangle,
   Ban,
@@ -74,27 +73,6 @@ export default function EventDetailPage() {
     enabled: !!eventId
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest('DELETE', `/api/events/${eventId}`);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Event deleted",
-        description: "The event has been deleted successfully.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
-      window.location.href = '/events';
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-  
   const cancelMutation = useMutation({
     mutationFn: async () => {
       if (!cancellationReason.trim()) {
@@ -124,11 +102,6 @@ export default function EventDetailPage() {
     }
   });
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
-      deleteMutation.mutate();
-    }
-  };
   
   const handleCancelEvent = () => {
     setCancelDialogOpen(true);
@@ -273,16 +246,6 @@ export default function EventDetailPage() {
                       </Tooltip>
                     </TooltipProvider>
                   )}
-                  
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    className="flex items-center" 
-                    onClick={handleDelete}
-                    disabled={deleteMutation.isPending}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" /> Delete
-                  </Button>
                 </div>
               </div>
               
