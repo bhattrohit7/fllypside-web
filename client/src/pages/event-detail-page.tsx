@@ -10,6 +10,7 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
+import EventAnalytics from "@/components/event-analytics";
 
 // Helper function to get currency symbol
 const getCurrencySymbol = (currency?: string): string => {
@@ -198,6 +199,12 @@ export default function EventDetailPage() {
                   </span>
                 </div>
               )}
+
+              {/* Event Analytics */}
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-4">Event Analytics</h3>
+                <EventAnalytics eventId={eventId} />
+              </div>
             </div>
           </Card>
         </div>

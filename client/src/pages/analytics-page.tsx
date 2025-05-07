@@ -14,6 +14,24 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Helper function to get currency symbol
+const getCurrencySymbol = (currency?: string): string => {
+  switch (currency) {
+    case 'USD':
+      return '$';
+    case 'EUR':
+      return '€';
+    case 'GBP':
+      return '£';
+    case 'INR':
+      return '₹';
+    case 'AUD':
+      return 'A$';
+    default:
+      return '$';
+  }
+};
+
 // Sample chart colors
 const CHART_COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
 
@@ -186,7 +204,7 @@ export default function AnalyticsPage() {
                                 Total Revenue
                               </p>
                               <p className="text-lg font-medium text-gray-900">
-                                ${analyticsData?.revenue?.total || 0}
+                                {getCurrencySymbol(businessPartner?.preferredCurrency || 'USD')}{analyticsData?.revenue?.total || 0}
                               </p>
                             </div>
                           </div>
@@ -337,7 +355,7 @@ export default function AnalyticsPage() {
                                 <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                                   <DollarSign className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
                                   <p>
-                                    ${event.revenue} revenue
+                                    {getCurrencySymbol(businessPartner?.preferredCurrency || 'USD')}{event.revenue} revenue
                                   </p>
                                 </div>
                               </div>
