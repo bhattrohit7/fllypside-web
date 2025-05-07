@@ -500,6 +500,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Event analytics
+  app.get("/api/events/:id/analytics", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      
+      // Get business partner for the user
+      const businessPartner = await storage.getBusinessPartnerByUserId(userId);
+      
+      if (!businessPartner) {
+        return res.status(400).json({ message: "Business partner profile not found" });
+      }
+      
+      // Make sure the event belongs to the business partner
+      const existingEvent = await storage.getEvent(eventId);
+      if (!existingEvent || existingEvent.hostId !== businessPartner.id) {
+        return res.status(403).json({ message: "Not authorized to view analytics for this event" });
+      }
+      
+      const participants = await storage.getEventParticipants(eventId);
+      
+      // Calculate analytics data
+      const totalParticipants = existingEvent.currentParticipants;
+      const maxParticipants = existingEvent.maxParticipants;
+      const registrationRate = Math.round((totalParticipants / maxParticipants) * 100);
+      
+      // For demo purposes, generate attendance data
+      const attendedParticipants = Math.floor(totalParticipants * 0.85); // 85% attendance rate
+      const attendanceRate = Math.round((attendedParticipants / totalParticipants) * 100);
+      
+      // Revenue calculations
+      const isPaidEvent = existingEvent.price > 0;
+      const totalRevenue = existingEvent.price * totalParticipants;
+      const averageRevenue = totalParticipants > 0 ? (totalRevenue / totalParticipants) : 0;
+      
+      // Demographics data (simulated for demo)
+      const demographics = {
+        'Local': 65,
+        'Non-local': 35,
+        'First-time': 40,
+        'Returning': 60
+      };
+      
+      // Engagement metrics (simulated for demo)
+      const engagement = {
+        'Shares': Math.floor(totalParticipants * 1.2),
+        'Reviews': Math.floor(totalParticipants * 0.6),
+        'Comments': Math.floor(totalParticipants * 2.5)
+      };
+      
+      res.json({
+        totalParticipants,
+        maxParticipants,
+        registrationRate,
+        attendedParticipants,
+        attendanceRate,
+        isPaidEvent,
+        totalRevenue: Math.round(totalRevenue * 100) / 100,
+        averageRevenue: Math.round(averageRevenue * 100) / 100,
+        demographics,
+        engagement
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event analytics" });
+    }
+  });
+  
   // Analytics routes
   app.get("/api/analytics", async (req, res) => {
     try {
