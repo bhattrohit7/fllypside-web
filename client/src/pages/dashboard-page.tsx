@@ -59,91 +59,91 @@ export default function DashboardPage() {
               
               <div className="page-content">
                 {/* Welcome card */}
-                <Card className="mb-6">
-                  <CardContent className="px-4 py-5 sm:p-6">
-                    <h2 className="text-lg font-medium text-gray-900">
+                <Card className="mb-6 border-l-4 border-primary">
+                  <CardContent className="px-5 py-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">
                       Welcome, {businessPartner?.firstName || user?.username}!
                     </h2>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="text-sm text-gray-600">
                       Manage your business profile, create events, and track performance all in one place.
                     </p>
                   </CardContent>
                 </Card>
                 
                 {/* Stats cards */}
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {isStatsLoading ? (
                     renderStatsSkeleton()
                   ) : (
                     <>
                       {/* Total events */}
-                      <Card>
-                        <CardContent className="px-4 py-5">
+                      <Card className="stats-card overflow-hidden">
+                        <CardContent className="px-5 py-6">
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-primary rounded-md p-3">
+                            <div className="flex-shrink-0 bg-gradient-to-br from-primary to-primary/80 rounded-xl p-3 shadow-md">
                               <Calendar className="h-5 w-5 text-white" />
                             </div>
                             <div className="ml-5 w-0 flex-1">
                               <p className="text-sm font-medium text-gray-500 truncate">
                                 Total Events
                               </p>
-                              <p className="text-lg font-medium text-gray-900">
+                              <p className="text-2xl font-semibold text-gray-900 mt-1">
                                 {stats?.totalEvents || 0}
                               </p>
                             </div>
                           </div>
                         </CardContent>
-                        <CardFooter className="bg-gray-50 px-4 py-4">
-                          <Link href="/events" className="text-sm font-medium text-primary hover:text-blue-400">
-                            View all events <span aria-hidden="true">&rarr;</span>
+                        <CardFooter className="bg-gray-50 px-5 py-4 rounded-b-xl border-t border-gray-100">
+                          <Link href="/events" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200">
+                            View all events <span aria-hidden="true" className="ml-1 transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
                           </Link>
                         </CardFooter>
                       </Card>
                       
                       {/* Active offers */}
-                      <Card>
-                        <CardContent className="px-4 py-5">
+                      <Card className="stats-card overflow-hidden">
+                        <CardContent className="px-5 py-6">
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-secondary rounded-md p-3">
+                            <div className="flex-shrink-0 bg-gradient-to-br from-secondary to-secondary/80 rounded-xl p-3 shadow-md">
                               <Tag className="h-5 w-5 text-white" />
                             </div>
                             <div className="ml-5 w-0 flex-1">
                               <p className="text-sm font-medium text-gray-500 truncate">
                                 Active Offers
                               </p>
-                              <p className="text-lg font-medium text-gray-900">
+                              <p className="text-2xl font-semibold text-gray-900 mt-1">
                                 {stats?.activeOffers || 0}
                               </p>
                             </div>
                           </div>
                         </CardContent>
-                        <CardFooter className="bg-gray-50 px-4 py-4">
-                          <Link href="/offers" className="text-sm font-medium text-primary hover:text-blue-400">
-                            View all offers <span aria-hidden="true">&rarr;</span>
+                        <CardFooter className="bg-gray-50 px-5 py-4 rounded-b-xl border-t border-gray-100">
+                          <Link href="/offers" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200">
+                            View all offers <span aria-hidden="true" className="ml-1 transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
                           </Link>
                         </CardFooter>
                       </Card>
                       
                       {/* Total participants */}
-                      <Card>
-                        <CardContent className="px-4 py-5">
+                      <Card className="stats-card overflow-hidden">
+                        <CardContent className="px-5 py-6">
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-accent rounded-md p-3">
+                            <div className="flex-shrink-0 bg-gradient-to-br from-accent to-accent/80 rounded-xl p-3 shadow-md">
                               <Users className="h-5 w-5 text-white" />
                             </div>
                             <div className="ml-5 w-0 flex-1">
                               <p className="text-sm font-medium text-gray-500 truncate">
                                 Total Participants
                               </p>
-                              <p className="text-lg font-medium text-gray-900">
+                              <p className="text-2xl font-semibold text-gray-900 mt-1">
                                 {stats?.totalParticipants || 0}
                               </p>
                             </div>
                           </div>
                         </CardContent>
-                        <CardFooter className="bg-gray-50 px-4 py-4">
-                          <Link href="/analytics" className="text-sm font-medium text-primary hover:text-blue-400">
-                            View analytics <span aria-hidden="true">&rarr;</span>
+                        <CardFooter className="bg-gray-50 px-5 py-4 rounded-b-xl border-t border-gray-100">
+                          <Link href="/analytics" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200">
+                            View analytics <span aria-hidden="true" className="ml-1 transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
                           </Link>
                         </CardFooter>
                       </Card>
@@ -229,21 +229,21 @@ export default function DashboardPage() {
                 </div>
                 
                 {/* Quick actions */}
-                <div className="mt-6">
-                  <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
+                <div className="mt-8">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
                   
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     <Link href="/events/create" className="block">
-                      <div className="relative bg-white rounded-lg shadow px-5 py-6 flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary">
-                        <div className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-md bg-primary text-white">
+                      <div className="card relative group px-6 py-6 flex items-center space-x-4 hover:border-primary/20 transition-all duration-300">
+                        <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-white shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
                           <Calendar className="h-6 w-6" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <span className="absolute inset-0" aria-hidden="true"></span>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-base font-semibold text-gray-900 group-hover:text-primary transition-colors duration-200">
                             Create Event
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-sm text-gray-500 mt-1">
                             Set up a new event for your customers
                           </p>
                         </div>
@@ -251,16 +251,16 @@ export default function DashboardPage() {
                     </Link>
                     
                     <Link href="/offers/create" className="block">
-                      <div className="relative bg-white rounded-lg shadow px-5 py-6 flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary">
-                        <div className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-md bg-secondary text-white">
+                      <div className="card relative group px-6 py-6 flex items-center space-x-4 hover:border-secondary/20 transition-all duration-300">
+                        <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-secondary to-secondary/80 text-white shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
                           <Tag className="h-6 w-6" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <span className="absolute inset-0" aria-hidden="true"></span>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-base font-semibold text-gray-900 group-hover:text-secondary transition-colors duration-200">
                             Create Offer
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-sm text-gray-500 mt-1">
                             Set up a promotional discount
                           </p>
                         </div>
@@ -268,16 +268,16 @@ export default function DashboardPage() {
                     </Link>
                     
                     <Link href="/profile" className="block">
-                      <div className="relative bg-white rounded-lg shadow px-5 py-6 flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary">
-                        <div className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-md bg-accent text-white">
+                      <div className="card relative group px-6 py-6 flex items-center space-x-4 hover:border-accent/20 transition-all duration-300">
+                        <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-accent to-accent/80 text-white shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
                           <Edit className="h-6 w-6" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <span className="absolute inset-0" aria-hidden="true"></span>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-base font-semibold text-gray-900 group-hover:text-accent transition-colors duration-200">
                             Edit Profile
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-sm text-gray-500 mt-1">
                             Update your business information
                           </p>
                         </div>
