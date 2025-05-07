@@ -9,6 +9,7 @@ import DashboardPage from "@/pages/dashboard-page";
 import ProfilePage from "@/pages/profile-page";
 import EventsPage from "@/pages/events-page";
 import CreateEventPage from "@/pages/create-event-page";
+import EventDetailPage from "@/pages/event-detail-page";
 import OffersPage from "@/pages/offers-page";
 import CreateOfferPage from "@/pages/create-offer-page";
 import AnalyticsPage from "@/pages/analytics-page";
@@ -23,6 +24,7 @@ function Router() {
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/events" component={EventsPage} />
       <ProtectedRoute path="/events/create" component={CreateEventPage} />
+      <ProtectedRoute path="/events/:id" component={EventDetailPage} />
       <ProtectedRoute path="/offers" component={OffersPage} />
       <ProtectedRoute path="/offers/create" component={CreateOfferPage} />
       <ProtectedRoute path="/analytics" component={AnalyticsPage} />

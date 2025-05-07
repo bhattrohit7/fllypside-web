@@ -14,8 +14,27 @@ interface EventCardProps {
     maxParticipants: number;
     currentParticipants: number;
     price: number;
+    currency: string;
   };
 }
+
+// Helper function to get currency symbol
+const getCurrencySymbol = (currency?: string): string => {
+  switch (currency) {
+    case 'USD':
+      return '$';
+    case 'EUR':
+      return '€';
+    case 'GBP':
+      return '£';
+    case 'INR':
+      return '₹';
+    case 'AUD':
+      return 'A$';
+    default:
+      return '$';
+  }
+};
 
 export default function EventCard({ event }: EventCardProps) {
   const formatDate = (dateString: string) => {
@@ -70,7 +89,7 @@ export default function EventCard({ event }: EventCardProps) {
         {/* Footer section with actions - always at bottom */}
         <div className="mt-5 pt-3 flex items-center justify-between border-t border-gray-100">
           <Badge variant="outline" className="bg-gradient-to-r from-green-50 to-green-100 text-green-800 font-medium border-green-200 shadow-sm">
-            {event.price > 0 ? `$${event.price}` : 'Free'}
+            {event.price > 0 ? `${getCurrencySymbol(event.currency)}${event.price}` : 'Free'}
           </Badge>
           <Link href={`/events/${event.id}`}>
             <Button variant="outline" size="sm" className="shadow-sm">
