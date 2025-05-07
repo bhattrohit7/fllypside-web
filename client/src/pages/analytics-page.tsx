@@ -353,7 +353,6 @@ export default function AnalyticsPage() {
                                   </p>
                                 </div>
                                 <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                  <DollarSign className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
                                   <p>
                                     {getCurrencySymbol(event.currency || analyticsData?.revenue?.currency || businessPartner?.preferredCurrency || 'INR')}{event.revenue} revenue
                                   </p>
