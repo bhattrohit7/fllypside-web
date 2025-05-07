@@ -2,7 +2,28 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
+// Import base Progress component
+import { Progress as BaseProgress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+
+// Create a custom Progress component that correctly displays 0%
+const Progress = React.forwardRef<
+  React.ElementRef<typeof BaseProgress>,
+  React.ComponentPropsWithoutRef<typeof BaseProgress>
+>(({ className, value, ...props }, ref) => {
+  // Ensure the value is between 0 and 100
+  const clampedValue = Math.max(0, Math.min(100, value || 0));
+  
+  return (
+    <BaseProgress
+      ref={ref}
+      className={cn(className)}
+      // If value is 0, we'll override with a minimal width
+      value={clampedValue === 0 ? 0.1 : clampedValue}
+      {...props}
+    />
+  );
+});
 import { Users, Calendar, Target, Map, DollarSign } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -34,6 +55,13 @@ const EventAnalytics: React.FC<EventAnalyticsProps> = ({ eventId }) => {
   const { data: eventAnalytics, isLoading } = useQuery({
     queryKey: ['/api/events', eventId, 'analytics'],
     queryFn: ({ queryKey }) => fetch(`/api/events/${queryKey[1]}/analytics`).then(res => res.json()),
+    enabled: !!eventId,
+  });
+  
+  // Also fetch the event to get its currency
+  const { data: event } = useQuery({
+    queryKey: ['/api/events', eventId],
+    queryFn: ({ queryKey }) => fetch(`/api/events/${queryKey[1]}`).then(res => res.json()),
     enabled: !!eventId,
   });
 
@@ -121,11 +149,11 @@ const EventAnalytics: React.FC<EventAnalyticsProps> = ({ eventId }) => {
                   <span className="text-sm font-medium">Revenue</span>
                 </div>
                 <span className="text-sm font-bold bg-yellow-50 px-2 py-1 rounded-full">
-                  {getCurrencySymbol(businessPartner?.preferredCurrency || 'USD')}{eventAnalytics.totalRevenue || 0}
+                  {getCurrencySymbol(event?.currency || 'USD')}{eventAnalytics.totalRevenue || 0}
                 </span>
               </div>
               <div className="mt-3 flex items-center justify-between text-xs p-2 bg-gray-50/60 rounded-md">
-                <span>Average per participant: <span className="font-medium">{getCurrencySymbol(businessPartner?.preferredCurrency || 'USD')}{eventAnalytics.averageRevenue || 0}</span></span>
+                <span>Average per participant: <span className="font-medium">{getCurrencySymbol(event?.currency || 'USD')}{eventAnalytics.averageRevenue || 0}</span></span>
                 <span className="bg-primary/10 px-2 py-1 rounded-full text-primary font-medium">{eventAnalytics.totalParticipants || 0} paying participants</span>
               </div>
             </div>
