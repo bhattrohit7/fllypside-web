@@ -40,8 +40,9 @@ const eventFormSchema = z.object({
     }, "Events cannot be created for past dates"),
   endDateTime: z.string()
     .min(1, "End date and time is required")
-    .refine((date, ctx) => {
-      const startDate = ctx.path.includes("endDateTime") ? new Date(ctx.data.startDateTime || '') : undefined;
+    .refine((date, ctx: any) => {
+      // Fix the type issue by properly typing ctx and using optional chaining
+      const startDate = ctx?.data?.startDateTime ? new Date(ctx.data.startDateTime) : undefined;
       const endDate = new Date(date);
       
       if (startDate && endDate <= startDate) {
@@ -187,7 +188,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
     
     try {
       // Create a clean data object for submission
-      const eventData = {
+      const eventData: any = {
         hostId: businessPartner?.id,
         name: values.name,
         description: values.description || "",
@@ -201,11 +202,6 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
         draftMode: Boolean(values.draftMode)
       };
       
-      // Add banner image if available
-      if (imagePreview) {
-        eventData.bannerImage = imagePreview;
-      }
-      
       // Add offer ID if selected
       if (values.offerId && values.offerId !== '') {
         eventData.offerId = Number(values.offerId);
@@ -215,8 +211,21 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
       
       if (existingData?.id) {
         console.log("Updating existing event:", existingData.id);
+        
+        // For updates, only include the banner image if it's new or changed
+        // This helps reduce payload size for updates
+        if (imagePreview && imagePreview !== existingData?.bannerImage) {
+          console.log("Including banner image in update");
+          eventData.bannerImage = imagePreview;
+        }
+        
         updateEventMutation.mutate({ id: existingData.id, data: eventData });
       } else {
+        // For new events, always include the banner image if available
+        if (imagePreview) {
+          eventData.bannerImage = imagePreview;
+        }
+        
         console.log("Creating new event");
         createEventMutation.mutate(eventData);
       }
@@ -256,7 +265,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
       tomorrow.setDate(tomorrow.getDate() + 1);
       
       // Create the event data object with draft mode explicitly set to true
-      const eventData = {
+      const eventData: any = {
         hostId: businessPartner?.id,
         name: currentValues.name,
         description: currentValues.description || "",
@@ -271,17 +280,20 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
         draftMode: true  // Always true for drafts - this is critical
       };
       
-      // Add banner image if available
-      if (imagePreview) {
-        eventData.bannerImage = imagePreview;
-      }
-      
-      console.log("Draft data being submitted:", eventData);
-      
-      // Submit directly to the mutation
+      // For the update case
       if (existingData?.id) {
+        console.log("Updating existing draft event:", existingData.id);
+        // Only include the banner image if it's changed
+        if (imagePreview && imagePreview !== existingData?.bannerImage) {
+          eventData.bannerImage = imagePreview;
+        }
         updateEventMutation.mutate({ id: existingData.id, data: eventData });
       } else {
+        // For new drafts, include the banner image if available
+        if (imagePreview) {
+          eventData.bannerImage = imagePreview;
+        }
+        console.log("Creating new draft event");
         createEventMutation.mutate(eventData);
       }
     } catch (error) {
