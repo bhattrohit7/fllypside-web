@@ -45,6 +45,7 @@ export interface IStorage {
   createEvent(data: InsertEvent): Promise<Event>;
   updateEvent(id: number, data: Partial<Event>): Promise<Event>;
   deleteEvent(id: number): Promise<void>;
+  cancelEvent(id: number, reason: string): Promise<Event>;
 
   // Offer methods
   getOffer(id: number): Promise<Offer | undefined>;

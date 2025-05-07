@@ -89,6 +89,9 @@ export const events = pgTable("events", {
   requireIdVerification: boolean("require_id_verification").default(false),
   location: text("location"),
   draftMode: boolean("draft_mode").default(false),
+  status: text("status").default("active").notNull(), // 'active', 'cancelled'
+  cancellationReason: text("cancellation_reason"),
+  cancelledAt: timestamp("cancelled_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
