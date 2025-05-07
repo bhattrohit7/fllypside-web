@@ -704,13 +704,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getEventsByBusinessPartnerId(businessPartnerId: number, status: string): Promise<Event[]> {
+    const now = new Date();
     let query = db.select().from(events).where(eq(events.hostId, businessPartnerId));
     
     if (status === "upcoming") {
-      query = query.where(gte(events.startDate, new Date()));
+      // Upcoming events: not cancelled, start date in the future
+      query = query.where(
+        and(
+          eq(events.status, "active"),
+          gte(events.startDate, now),
+          eq(events.draftMode, false)
+        )
+      );
     } else if (status === "past") {
-      query = query.where(lt(events.endDate, new Date()));
+      // Past events: end date in the past, not a draft
+      query = query.where(
+        and(
+          lt(events.endDate, now),
+          eq(events.draftMode, false)
+        )
+      );
+    } else if (status === "cancelled") {
+      // Only cancelled events
+      query = query.where(eq(events.status, "cancelled"));
     } else if (status === "draft") {
+      // Draft events
       query = query.where(eq(events.draftMode, true));
     }
     

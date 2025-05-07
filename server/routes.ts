@@ -72,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/events", async (req, res) => {
     try {
       const userId = req.user!.id;
-      const status = req.query.status as string || "upcoming"; // upcoming, past, draft
+      const status = req.query.status as string || "upcoming"; // upcoming, past, cancelled, draft
       
       console.log("GET /api/events with status:", status, "query params:", req.query);
       
@@ -83,6 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Business partner profile not found" });
       }
       
+      // Get events from storage based on the requested status
       const events = await storage.getEventsByBusinessPartnerId(businessPartner.id, status);
       console.log(`Fetched ${events.length} events with status '${status}'`);
       res.json(events);
