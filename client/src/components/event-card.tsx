@@ -82,7 +82,9 @@ export default function EventCard({ event }: EventCardProps) {
           </div>
           <div className="flex items-center text-sm text-gray-600">
             <Users className="flex-shrink-0 mr-2 h-4 w-4 text-primary/70" />
-            <p className="truncate">{event.currentParticipants} / {event.maxParticipants} participants</p>
+            <p className="truncate">
+              {event.currentParticipants !== undefined ? event.currentParticipants : 0} / {event.maxParticipants} participants
+            </p>
           </div>
         </div>
         
