@@ -618,21 +618,9 @@ export class MemStorage implements IStorage {
   }
 
   async getEventsByOfferId(offerId: number): Promise<Event[]> {
-    // Find all event-offer mappings for this offer
-    const eventIds = Array.from(this.eventOffers.values())
-      .filter(pair => pair.offerId === offerId)
-      .map(pair => pair.eventId);
-    
-    // Get the events
-    const events: Event[] = [];
-    for (const eventId of eventIds) {
-      const event = await this.getEvent(eventId);
-      if (event) {
-        events.push(event);
-      }
-    }
-    
-    return events;
+    // Find all events that directly reference this offer
+    return Array.from(this.events.values())
+      .filter(event => event.offerId === offerId);
   }
 
   // Event participants
@@ -886,19 +874,13 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getEventsByOfferId(offerId: number): Promise<Event[]> {
-    // Get all events linked to this offer
+    // Get all events linked to this offer through the direct relationship
     const linkedEvents = await db
-      .select({
-        event: events
-      })
-      .from(eventOffers)
-      .innerJoin(
-        events,
-        eq(eventOffers.eventId, events.id)
-      )
-      .where(eq(eventOffers.offerId, offerId));
+      .select()
+      .from(events)
+      .where(eq(events.offerId, offerId));
     
-    return linkedEvents.map(item => item.event);
+    return linkedEvents;
   }
 
   // Event participants
