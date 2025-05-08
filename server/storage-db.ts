@@ -11,7 +11,6 @@ import {
   offers,
   type Offer,
   type InsertOffer,
-  eventOffers,
   eventParticipants
 } from "@shared/schema";
 import session from "express-session";
@@ -300,6 +299,12 @@ export class DatabaseStorage {
   }
 
   async deleteOffer(id: number): Promise<void> {
+    // First clear all references to this offer from events
+    await db.update(events)
+      .set({ offerId: null })
+      .where(eq(events.offerId, id));
+    
+    // Then delete the offer
     await db.delete(offers).where(eq(offers.id, id));
   }
 
@@ -307,15 +312,12 @@ export class DatabaseStorage {
     // First, get all events for the business partner
     const partnerEvents = await this.getEventsByBusinessPartnerId(businessPartnerId, "all");
     
-    // Delete any existing links for this offer
-    await db.delete(eventOffers).where(eq(eventOffers.offerId, offerId));
-    
-    // Create new links for all events
+    // Update all events to reference this offer ID directly
     for (const event of partnerEvents) {
-      await db.insert(eventOffers).values({
-        eventId: event.id,
-        offerId
-      });
+      await db
+        .update(events)
+        .set({ offerId })
+        .where(eq(events.id, event.id));
     }
   }
 

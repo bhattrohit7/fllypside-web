@@ -141,13 +141,8 @@ export const eventImages = pgTable("event_images", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Event offers (many-to-many)
-export const eventOffers = pgTable("event_offers", {
-  eventId: integer("event_id").references(() => events.id, { onDelete: 'cascade' }).notNull(),
-  offerId: integer("offer_id").references(() => offers.id, { onDelete: 'cascade' }).notNull(),
-}, (t) => ({
-  pk: primaryKey(t.eventId, t.offerId),
-}));
+// Note: We've removed the event_offers junction table
+// Events now directly reference offers through the offerId field
 
 // Event participants (many-to-many)
 export const eventParticipants = pgTable("event_participants", {

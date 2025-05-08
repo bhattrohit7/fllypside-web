@@ -11,7 +11,6 @@ import {
   offers,
   type Offer,
   type InsertOffer,
-  eventOffers,
   eventParticipants,
   businessPartnerInterests,
   interests
@@ -68,7 +67,6 @@ export class MemStorage implements IStorage {
   private businessPartners: Map<number, BusinessPartner>;
   private events: Map<number, Event>;
   private offers: Map<number, Offer>;
-  private eventOffers: Map<string, { eventId: number, offerId: number }>;
   private eventParticipants: Map<string, { eventId: number, businessPartnerId: number }>;
   private businessPartnerInterests: Map<string, { businessPartnerId: number, interestId: number }>;
   private interests: Map<number, { id: number, name: string }>;
@@ -85,7 +83,6 @@ export class MemStorage implements IStorage {
     this.businessPartners = new Map();
     this.events = new Map();
     this.offers = new Map();
-    this.eventOffers = new Map();
     this.eventParticipants = new Map();
     this.businessPartnerInterests = new Map();
     this.interests = new Map();
@@ -495,13 +492,7 @@ export class MemStorage implements IStorage {
   async deleteEvent(id: number): Promise<void> {
     this.events.delete(id);
     
-    // Also remove related associations
-    for (const [key, value] of this.eventOffers.entries()) {
-      if (value.eventId === id) {
-        this.eventOffers.delete(key);
-      }
-    }
-    
+    // Also remove related associations with participants
     for (const [key, value] of this.eventParticipants.entries()) {
       if (value.eventId === id) {
         this.eventParticipants.delete(key);
@@ -551,8 +542,8 @@ export class MemStorage implements IStorage {
       })
       .map(offer => {
         // Count linked events
-        const linkedEvents = Array.from(this.eventOffers.values())
-          .filter(eo => eo.offerId === offer.id)
+        const linkedEvents = Array.from(this.events.values())
+          .filter(event => event.offerId === offer.id)
           .length;
         
         return {
@@ -595,10 +586,15 @@ export class MemStorage implements IStorage {
   async deleteOffer(id: number): Promise<void> {
     this.offers.delete(id);
     
-    // Also remove related associations
-    for (const [key, value] of this.eventOffers.entries()) {
-      if (value.offerId === id) {
-        this.eventOffers.delete(key);
+    // Clear offer references from events
+    for (const [eventId, event] of this.events.entries()) {
+      if (event.offerId === id) {
+        const updatedEvent = {
+          ...event,
+          offerId: null,
+          updatedAt: new Date()
+        };
+        this.events.set(eventId, updatedEvent);
       }
     }
   }
