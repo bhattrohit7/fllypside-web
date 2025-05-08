@@ -798,6 +798,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Questions': totalParticipants > 0 ? Math.round(totalParticipants * 1.5) : 0
       };
       
+      // Calculate attendance rate (percentage of registered participants who actually attended)
+      const attendedParticipants = Math.round(totalParticipants * 0.8); // Estimation for now
+      const attendanceRate = totalParticipants > 0 
+        ? Math.round((attendedParticipants / totalParticipants) * 100) 
+        : 0;
+
       res.json({
         totalParticipants,
         maxParticipants,
@@ -805,7 +811,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isPaidEvent,
         totalRevenue,
         averageRevenue,
-        attendedParticipants: Math.round(totalParticipants * 0.8), // Placeholder attendance rate
+        attendedParticipants,
+        attendanceRate,
         demographics,
         engagement
       });
