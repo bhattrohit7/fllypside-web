@@ -109,16 +109,17 @@ export default function EventDetailPage() {
     setCancelDialogOpen(true);
   };
   
-  // Check if event can be cancelled (created within the last 24 hours)
+  // Check if event can be cancelled (starts more than 24 hours from now)
   const canCancel = () => {
     if (!event || event.status === 'cancelled') return false;
     
     const now = new Date();
-    const creationTime = new Date(event.createdAt);
-    const timeDifference = now.getTime() - creationTime.getTime();
+    const startTime = new Date(event.startDate);
+    const timeDifference = startTime.getTime() - now.getTime();
     const hoursDifference = timeDifference / (1000 * 60 * 60);
     
-    return hoursDifference <= 24;
+    // Allow cancellation if the event is at least 24 hours in the future
+    return hoursDifference >= 24;
   };
 
   const formatDate = (dateString?: string) => {
@@ -260,7 +261,7 @@ export default function EventDetailPage() {
                         </TooltipTrigger>
                         {!canCancel() && (
                           <TooltipContent className="max-w-xs">
-                            <p>Events can only be cancelled within 24 hours of creation</p>
+                            <p>Events can only be cancelled if they start more than 24 hours from now</p>
                           </TooltipContent>
                         )}
                       </Tooltip>

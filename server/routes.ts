@@ -360,16 +360,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Not authorized to cancel this event" });
       }
       
-      // Check if event was created within the last 24 hours
+      // Check if event starts at least 24 hours from now
       const now = new Date();
-      const eventCreationTime = new Date(existingEvent.createdAt);
-      const timeDifference = now.getTime() - eventCreationTime.getTime();
+      const eventStartTime = new Date(existingEvent.startDate);
+      const timeDifference = eventStartTime.getTime() - now.getTime();
       const hoursDifference = timeDifference / (1000 * 60 * 60);
       
-      if (hoursDifference > 24) {
+      if (hoursDifference < 24) {
         return res.status(400).json({ 
-          message: "Events can only be cancelled within 24 hours of creation",
-          hoursElapsed: Math.round(hoursDifference)
+          message: "Events can only be cancelled if they start more than 24 hours from now",
+          hoursUntilStart: Math.round(hoursDifference)
         });
       }
       
