@@ -745,6 +745,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Individual event analytics
+  app.get("/api/events/:id/analytics", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      
+      // Get business partner for the user
+      const businessPartner = await storage.getBusinessPartnerByUserId(userId);
+      
+      if (!businessPartner) {
+        return res.status(400).json({ message: "Business partner profile not found" });
+      }
+      
+      // Get the event
+      const event = await storage.getEvent(eventId);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      // Check if the event belongs to the business partner
+      if (event.hostId !== businessPartner.id) {
+        return res.status(403).json({ message: "Not authorized to view analytics for this event" });
+      }
+      
+      // Get participants
+      const participants = await storage.getEventParticipants(eventId);
+      
+      // Calculate analytics
+      const totalParticipants = participants.length;
+      const maxParticipants = event.maxParticipants;
+      const registrationRate = maxParticipants > 0 
+        ? Math.round((totalParticipants / maxParticipants) * 100) 
+        : 0;
+      
+      // For paid events, calculate revenue metrics
+      const isPaidEvent = event.price > 0;
+      const totalRevenue = isPaidEvent ? totalParticipants * event.price : 0;
+      const averageRevenue = totalParticipants > 0 ? totalRevenue / totalParticipants : 0;
+      
+      // Sample demographics data (placeholder for now)
+      const demographics = {
+        'Business': 60,
+        'Education': 25,
+        'Technology': 15
+      };
+      
+      // Sample engagement metrics (placeholder for now)
+      const engagement = {
+        'Shares': totalParticipants > 0 ? Math.round(totalParticipants * 0.3) : 0,
+        'Rating': '4.7/5',
+        'Questions': totalParticipants > 0 ? Math.round(totalParticipants * 1.5) : 0
+      };
+      
+      res.json({
+        totalParticipants,
+        maxParticipants,
+        registrationRate,
+        isPaidEvent,
+        totalRevenue,
+        averageRevenue,
+        attendedParticipants: Math.round(totalParticipants * 0.8), // Placeholder attendance rate
+        demographics,
+        engagement
+      });
+    } catch (error) {
+      console.error("Error fetching event analytics:", error);
+      res.status(500).json({ message: "Failed to fetch event analytics", error: String(error) });
+    }
+  });
+
   // Share event via email
   app.post("/api/events/:id/share", async (req, res) => {
     try {
