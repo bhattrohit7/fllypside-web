@@ -229,6 +229,7 @@ export default function EventDetailPage() {
                     description={event.description}
                     url={window.location.href}
                     image={event.bannerImage || defaultImage}
+                    eventId={eventId}
                     trigger={
                       <Button 
                         variant="outline" 
