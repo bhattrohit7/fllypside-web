@@ -203,8 +203,11 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
       };
       
       // Add offer ID if selected
-      if (values.offerId && values.offerId !== '') {
+      if (values.offerId && values.offerId !== '' && values.offerId !== 'none') {
         eventData.offerId = Number(values.offerId);
+      } else {
+        // Explicitly set to null if no offer is selected
+        eventData.offerId = null;
       }
       
       console.log("Submitting event data:", eventData);
@@ -279,6 +282,13 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
         location: currentValues.location || "",
         draftMode: true  // Always true for drafts - this is critical
       };
+      
+      // Handle offer ID the same way as in onSubmit
+      if (currentValues.offerId && currentValues.offerId !== '' && currentValues.offerId !== 'none') {
+        eventData.offerId = Number(currentValues.offerId);
+      } else {
+        eventData.offerId = null;
+      }
       
       // For the update case
       if (existingData?.id) {
@@ -570,7 +580,7 @@ export default function EventForm({ onSuccess, existingData }: EventFormProps) {
                     <FormLabel>Attach promotional offer</FormLabel>
                     <Select 
                       onValueChange={(value) => field.onChange(value === "none" ? "" : value)} 
-                      defaultValue={field.value || "none"}
+                      defaultValue={field.value ? field.value.toString() : "none"}
                     >
                       <FormControl>
                         <SelectTrigger>
