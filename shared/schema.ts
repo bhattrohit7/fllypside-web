@@ -74,6 +74,26 @@ export const businessPartnerInterests = pgTable("business_partner_interests", {
   pk: primaryKey(t.businessPartnerId, t.interestId),
 }));
 
+// Promotional offers table
+export const offers = pgTable("offers", {
+  id: serial("id").primaryKey(),
+  businessPartnerId: integer("business_partner_id").references(() => businessPartners.id, { onDelete: 'cascade' }).notNull(),
+  text: text("text").notNull(),
+  percentage: integer("percentage").notNull(),
+  startDate: timestamp("start_date").notNull(),
+  expiryDate: timestamp("expiry_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertOfferSchema = createInsertSchema(offers)
+  .omit({ id: true, createdAt: true, updatedAt: true })
+  .extend({
+    percentage: z.coerce.number().min(1).max(100),
+    startDate: z.coerce.date(),
+    expiryDate: z.coerce.date().optional(),
+  });
+
 // Events table
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
@@ -92,6 +112,7 @@ export const events = pgTable("events", {
   status: text("status").default("active").notNull(), // 'active', 'cancelled'
   cancellationReason: text("cancellation_reason"),
   cancelledAt: timestamp("cancelled_at"),
+  offerId: integer("offer_id").references(() => offers.id, { onDelete: 'set null' }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -119,26 +140,6 @@ export const eventImages = pgTable("event_images", {
   imageUrl: text("image_url").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
-
-// Promotional offers table
-export const offers = pgTable("offers", {
-  id: serial("id").primaryKey(),
-  businessPartnerId: integer("business_partner_id").references(() => businessPartners.id, { onDelete: 'cascade' }).notNull(),
-  text: text("text").notNull(),
-  percentage: integer("percentage").notNull(),
-  startDate: timestamp("start_date").notNull(),
-  expiryDate: timestamp("expiry_date"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const insertOfferSchema = createInsertSchema(offers)
-  .omit({ id: true, createdAt: true, updatedAt: true })
-  .extend({
-    percentage: z.coerce.number().min(1).max(100),
-    startDate: z.coerce.date(),
-    expiryDate: z.coerce.date().optional(),
-  });
 
 // Event offers (many-to-many)
 export const eventOffers = pgTable("event_offers", {
