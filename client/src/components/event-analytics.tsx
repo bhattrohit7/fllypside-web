@@ -17,9 +17,9 @@ const Progress = React.forwardRef<
   return (
     <BaseProgress
       ref={ref}
-      className={cn(className)}
-      // If value is 0, we'll override with a minimal width
-      value={clampedValue === 0 ? 0.1 : clampedValue}
+      className={cn(className, clampedValue === 0 ? "bg-gray-100" : "")}
+      // For 0% display empty bar (value of 0)
+      value={clampedValue}
       {...props}
     />
   );
