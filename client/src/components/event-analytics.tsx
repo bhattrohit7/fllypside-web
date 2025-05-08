@@ -5,6 +5,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 // Import base Progress component
 import { Progress as BaseProgress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { 
+  Tooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger 
+} from "@/components/ui/tooltip";
 
 // Create a custom Progress component that correctly displays 0%
 const Progress = React.forwardRef<
@@ -170,10 +176,19 @@ const EventAnalytics: React.FC<EventAnalyticsProps> = ({ eventId }) => {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(eventAnalytics.demographics).map(([key, value], index) => (
-                  <div key={key} className="bg-gray-50/60 rounded-md p-2 shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <div className="text-xs text-gray-500">{key}</div>
-                    <div className="text-sm font-medium">{String(value)}%</div>
-                  </div>
+                  <TooltipProvider key={key}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-gray-50/60 rounded-md p-2 shadow-sm hover:shadow-md transition-shadow duration-300 cursor-help">
+                          <div className="text-xs text-gray-500 truncate">{key}</div>
+                          <div className="text-sm font-medium">{String(value)}%</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{key}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 ))}
               </div>
             </div>
@@ -190,10 +205,19 @@ const EventAnalytics: React.FC<EventAnalyticsProps> = ({ eventId }) => {
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {Object.entries(eventAnalytics.engagement).map(([key, value], index) => (
-                  <div key={key} className="bg-gray-50/60 rounded-md p-2 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <div className="text-xs text-gray-500">{key}</div>
-                    <div className="text-sm font-medium text-pink-600">{String(value)}</div>
-                  </div>
+                  <TooltipProvider key={key}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-gray-50/60 rounded-md p-2 text-center shadow-sm hover:shadow-md transition-shadow duration-300 cursor-help">
+                          <div className="text-xs text-gray-500 truncate">{key}</div>
+                          <div className="text-sm font-medium text-pink-600">{String(value)}</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{key}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 ))}
               </div>
             </div>
