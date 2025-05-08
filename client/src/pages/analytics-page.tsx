@@ -65,7 +65,7 @@ export default function AnalyticsPage() {
               
               <div className="page-content">
                 {/* Overview Cards */}
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
                   {isLoading ? (
                     Array(4).fill(0).map((_, index) => (
                       <Card key={index}>
@@ -94,19 +94,10 @@ export default function AnalyticsPage() {
                             <div className="flex-shrink-0 bg-primary rounded-md p-3">
                               <Users className="h-5 w-5 text-white" />
                             </div>
-                            <div className="ml-5 w-0 flex-1">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <p className="text-sm font-medium text-gray-500 truncate cursor-help">
-                                      Total Participants
-                                    </p>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Total Participants</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
+                            <div className="ml-5 flex-1">
+                              <p className="text-sm font-medium text-gray-500">
+                                Total Participants
+                              </p>
                               <p className="text-lg font-medium text-gray-900">
                                 {analyticsData?.participants?.total || 0}
                               </p>
@@ -140,19 +131,10 @@ export default function AnalyticsPage() {
                             <div className="flex-shrink-0 bg-secondary rounded-md p-3">
                               <CalendarCheck className="h-5 w-5 text-white" />
                             </div>
-                            <div className="ml-5 w-0 flex-1">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <p className="text-sm font-medium text-gray-500 truncate cursor-help">
-                                      Events Completed
-                                    </p>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Events Completed</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
+                            <div className="ml-5 flex-1">
+                              <p className="text-sm font-medium text-gray-500">
+                                Events Completed
+                              </p>
                               <p className="text-lg font-medium text-gray-900">
                                 {analyticsData?.events?.completed || 0}
                               </p>
@@ -186,19 +168,10 @@ export default function AnalyticsPage() {
                             <div className="flex-shrink-0 bg-accent rounded-md p-3">
                               <Tag className="h-5 w-5 text-white" />
                             </div>
-                            <div className="ml-5 w-0 flex-1">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <p className="text-sm font-medium text-gray-500 truncate cursor-help">
-                                      Offer Redemptions
-                                    </p>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Offer Redemptions</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
+                            <div className="ml-5 flex-1">
+                              <p className="text-sm font-medium text-gray-500">
+                                Offer Redemptions
+                              </p>
                               <p className="text-lg font-medium text-gray-900">
                                 {analyticsData?.offers?.redemptions || 0}
                               </p>
@@ -232,19 +205,10 @@ export default function AnalyticsPage() {
                             <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
                               <DollarSign className="h-5 w-5 text-white" />
                             </div>
-                            <div className="ml-5 w-0 flex-1">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <p className="text-sm font-medium text-gray-500 truncate cursor-help">
-                                      Total Revenue
-                                    </p>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Total Revenue</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
+                            <div className="ml-5 flex-1">
+                              <p className="text-sm font-medium text-gray-500">
+                                Total Revenue
+                              </p>
                               <p className="text-lg font-medium text-gray-900">
                                 {getCurrencySymbol(analyticsData?.revenue?.currency || businessPartner?.preferredCurrency || 'INR')}{analyticsData?.revenue?.total || 0}
                               </p>
