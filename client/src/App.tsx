@@ -12,6 +12,8 @@ import CreateEventPage from "@/pages/create-event-page";
 import EventDetailPage from "@/pages/event-detail-page";
 import OffersPage from "@/pages/offers-page";
 import CreateOfferPage from "@/pages/create-offer-page";
+import EditOfferPage from "@/pages/edit-offer-page";
+import OfferEventsPage from "@/pages/offer-events-page";
 import AnalyticsPage from "@/pages/analytics-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./lib/auth";
@@ -28,6 +30,8 @@ function Router() {
       <ProtectedRoute path="/events/:id" component={EventDetailPage} />
       <ProtectedRoute path="/offers" component={OffersPage} />
       <ProtectedRoute path="/offers/create" component={CreateOfferPage} />
+      <ProtectedRoute path="/offers/:id/edit" component={EditOfferPage} />
+      <ProtectedRoute path="/offers/:id/events" component={OfferEventsPage} />
       <ProtectedRoute path="/analytics" component={AnalyticsPage} />
       <Route component={NotFound} />
     </Switch>

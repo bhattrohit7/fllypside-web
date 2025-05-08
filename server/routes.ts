@@ -531,6 +531,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get events linked to a specific offer
+  app.get("/api/offers/:id/events", async (req, res) => {
+    try {
+      const offerId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      
+      // Get business partner for the user
+      const businessPartner = await storage.getBusinessPartnerByUserId(userId);
+      
+      if (!businessPartner) {
+        return res.status(400).json({ message: "Business partner profile not found" });
+      }
+      
+      // Make sure the offer belongs to the business partner
+      const existingOffer = await storage.getOffer(offerId);
+      if (!existingOffer || existingOffer.businessPartnerId !== businessPartner.id) {
+        return res.status(403).json({ message: "Not authorized to view events for this offer" });
+      }
+      
+      // Get all event-offer links for this offer
+      const eventOffers = await storage.getEventsByOfferId(offerId);
+      
+      res.json(eventOffers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch events linked to offer" });
+    }
+  });
+  
   // Event participants routes
   app.get("/api/events/:id/participants", async (req, res) => {
     try {

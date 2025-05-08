@@ -54,6 +54,7 @@ export interface IStorage {
   updateOffer(id: number, data: Partial<Offer>): Promise<Offer>;
   deleteOffer(id: number): Promise<void>;
   linkOfferToAllEvents(offerId: number, businessPartnerId: number): Promise<void>;
+  getEventsByOfferId(offerId: number): Promise<Event[]>;
 
   // Event participants
   getEventParticipants(eventId: number): Promise<any[]>;
