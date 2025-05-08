@@ -177,6 +177,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         draftMode: req.body.draftMode === true,
         bannerImage: req.body.bannerImage || null
       };
+
+      // Handle offer ID if provided
+      if (req.body.offerId) {
+        eventData.offerId = parseInt(req.body.offerId);
+      }
       
       console.log("Processed event data:", JSON.stringify(eventData, null, 2));
       
@@ -273,6 +278,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         draftMode: req.body.draftMode === true,
         bannerImage: req.body.bannerImage || existingEvent.bannerImage
       };
+      
+      // Handle offer ID if provided
+      if (req.body.offerId) {
+        eventData.offerId = parseInt(req.body.offerId);
+      }
       
       console.log("Processed event update data:", JSON.stringify(eventData, null, 2));
       
