@@ -604,16 +604,17 @@ export class MemStorage implements IStorage {
   }
 
   async linkOfferToAllEvents(offerId: number, businessPartnerId: number): Promise<void> {
-    // Get all upcoming events for this business partner
-    const events = await this.getEventsByBusinessPartnerId(businessPartnerId, "upcoming");
+    // Get all events for this business partner
+    const events = await this.getEventsByBusinessPartnerId(businessPartnerId, "all");
     
-    // Link the offer to each event
+    // Update all events to use this offer ID directly
     for (const event of events) {
-      const key = `${event.id}_${offerId}`;
-      this.eventOffers.set(key, {
-        eventId: event.id,
-        offerId,
-      });
+      const updatedEvent = { 
+        ...event, 
+        offerId: offerId,
+        updatedAt: new Date()
+      };
+      this.events.set(event.id, updatedEvent);
     }
   }
 
@@ -861,15 +862,11 @@ export class DatabaseStorage implements IStorage {
     // First, get all events for the business partner
     const partnerEvents = await this.getEventsByBusinessPartnerId(businessPartnerId, "all");
     
-    // Delete any existing links for this offer
-    await db.delete(eventOffers).where(eq(eventOffers.offerId, offerId));
-    
-    // Create new links for all events
+    // Update all events to have this offer ID
     for (const event of partnerEvents) {
-      await db.insert(eventOffers).values({
-        eventId: event.id,
-        offerId
-      });
+      await db.update(events)
+        .set({ offerId: offerId })
+        .where(eq(events.id, event.id));
     }
   }
   
