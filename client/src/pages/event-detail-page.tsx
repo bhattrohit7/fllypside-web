@@ -338,7 +338,7 @@ export default function EventDetailPage() {
                         <div>
                           <p className="font-medium text-gray-900">Participants</p>
                           <p className="text-gray-600">
-                            {event.currentParticipants} / {event.maxParticipants} registered
+                            {event.currentParticipants || 0} / {event.maxParticipants} registered
                           </p>
                           {event.requireIdVerification && (
                             <p className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 mt-1 rounded inline-block">
@@ -355,7 +355,7 @@ export default function EventDetailPage() {
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold">Registered Participants</h3>
                       <div className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-2.5 py-0.5 rounded-full text-xs font-semibold">
-                        {event.currentParticipants} Total
+                        {event.currentParticipants || 0} Total
                       </div>
                     </div>
                     
