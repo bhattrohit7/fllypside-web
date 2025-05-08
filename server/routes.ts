@@ -407,17 +407,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user!.id;
       const status = req.query.status as string || "active"; // active, expired
       
+      console.log("GET /api/offers with status:", status, "for user:", userId);
+      
       // Get business partner for the user
       const businessPartner = await storage.getBusinessPartnerByUserId(userId);
+      console.log("Business partner:", businessPartner?.id);
       
       if (!businessPartner) {
         return res.status(400).json({ message: "Business partner profile not found" });
       }
       
+      console.log("Fetching offers for business partner:", businessPartner.id);
       const offers = await storage.getOffersByBusinessPartnerId(businessPartner.id, status);
+      console.log("Found offers:", offers?.length || 0);
+      
       res.json(offers);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch offers" });
+      console.error("Error in GET /api/offers:", error);
+      res.status(500).json({ message: "Failed to fetch offers", error: String(error) });
     }
   });
   
