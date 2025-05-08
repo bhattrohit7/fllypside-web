@@ -163,7 +163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Prepare data for validation
-      const eventData: any = {
+      const eventData = {
         hostId: businessPartner.id,
         name: req.body.name || "Untitled Event",
         startDate,
@@ -266,7 +266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Prepare data for validation
-      const eventData: any = {
+      const eventData = {
         hostId: businessPartner.id,
         name: req.body.name || existingEvent.name,
         startDate,
@@ -323,6 +323,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+}
   
   app.delete("/api/events/:id", async (req, res) => {
     try {
@@ -508,25 +509,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Not authorized to update this offer" });
       }
       
-      // Prepare data with required fields
-      const offerData = {
-        businessPartnerId: businessPartner.id,
-        text: req.body.text || existingOffer.text,
-        percentage: req.body.percentage !== undefined ? req.body.percentage : existingOffer.percentage,
-        startDate: req.body.startDate ? new Date(req.body.startDate) : existingOffer.startDate,
-        expiryDate: req.body.expiryDate ? new Date(req.body.expiryDate) : existingOffer.expiryDate
-      };
-      
       // Update the offer
-      const offer = await storage.updateOffer(offerId, offerData);
+      const updatedOffer = await storage.updateOffer(offerId, req.body);
       
-      // If linkToAllEvents is true, handle linking
+      // Handle linking to events if requested
       if (req.body.linkToAllEvents === true) {
         await storage.linkOfferToAllEvents(offerId, businessPartner.id);
       }
       
-      res.json(offer);
+      res.json(updatedOffer);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
       res.status(500).json({ message: "Failed to update offer" });
     }
   });
@@ -557,16 +552,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Email invitation
+  // Offer events route - get all events linked to a specific offer
+  app.get("/api/offers/:id/events", async (req, res) => {
+    try {
+      const offerId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      
+      // Get business partner for the user
+      const businessPartner = await storage.getBusinessPartnerByUserId(userId);
+      
+      if (!businessPartner) {
+        return res.status(400).json({ message: "Business partner profile not found" });
+      }
+      
+      // Make sure the offer belongs to the business partner
+      const existingOffer = await storage.getOffer(offerId);
+      if (!existingOffer || existingOffer.businessPartnerId !== businessPartner.id) {
+        return res.status(403).json({ message: "Not authorized to view this offer's events" });
+      }
+      
+      // Get events that use this offer
+      const eventOffers = await storage.getEventsByOfferId(offerId);
+      
+      res.json(eventOffers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch offer events" });
+    }
+  });
+
+  // Event invitation email route
   app.post("/api/events/:id/invite", async (req, res) => {
+    try {
+      const { recipients, message } = req.body;
+      const eventId = parseInt(req.params.id);
+      const userId = req.user!.id;
+
+      if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+        return res.status(400).json({ message: "At least one recipient email is required" });
+      }
+
+      // Get business partner for the user
+      const businessPartner = await storage.getBusinessPartnerByUserId(userId);
+      if (!businessPartner) {
+        return res.status(400).json({ message: "Business partner profile not found" });
+      }
+
+      // Make sure the event belongs to the business partner
+      const event = await storage.getEvent(eventId);
+      if (!event || event.hostId !== businessPartner.id) {
+        return res.status(403).json({ message: "Not authorized to send invitations for this event" });
+      }
+
+      // Format the dates for display
+      const formatEventDate = (startDate: Date, endDate?: Date) => {
+        const startFormatted = format(new Date(startDate), "MMM d, yyyy h:mm a");
+        if (endDate) {
+          const endFormatted = format(new Date(endDate), "MMM d, yyyy h:mm a");
+          return `${startFormatted} to ${endFormatted}`;
+        }
+        return startFormatted;
+      };
+
+      const eventDate = formatEventDate(event.startDate, event.endDate);
+      
+      // Send invitation to each recipient
+      const results = await Promise.all(
+        recipients.map(async (email: string) => {
+          try {
+            const result = await sendEventInvitation({
+              to: email,
+              from: "noreply@flypside.com", // This should be a verified sender in your SendGrid account
+              eventName: event.name,
+              hostName: `${businessPartner.firstName} ${businessPartner.lastName}`,
+              eventDate,
+              location: event.location || "Location to be announced",
+              price: event.price ? `${getCurrencySymbol(event.currency)}${event.price}` : "Free",
+              personalMessage: message || "",
+              eventLink: `${process.env.SITE_URL || "https://flypside.com"}/events/${event.id}`
+            });
+            
+            return { email, success: result.success, message: result.message };
+          } catch (error) {
+            console.error(`Error sending invitation to ${email}:`, error);
+            return { email, success: false, message: String(error) };
+          }
+        })
+      );
+      
+      res.json({ 
+        message: "Invitations processed", 
+        results,
+        successCount: results.filter(r => r.success).length,
+        totalCount: results.length 
+      });
+    } catch (error) {
+      console.error("Error processing invitations:", error);
+      res.status(500).json({ message: "Failed to send invitations", error: String(error) });
+    }
+  });
+
+  // Event participants route
+  app.get("/api/events/:id/participants", async (req, res) => {
     try {
       const eventId = parseInt(req.params.id);
       const userId = req.user!.id;
-      const { email, personalMessage } = req.body;
-      
-      if (!email) {
-        return res.status(400).json({ message: "Email address is required" });
-      }
       
       // Get business partner for the user
       const businessPartner = await storage.getBusinessPartnerByUserId(userId);
@@ -576,57 +665,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Make sure the event belongs to the business partner
-      const event = await storage.getEvent(eventId);
-      if (!event || event.hostId !== businessPartner.id) {
-        return res.status(403).json({ message: "Not authorized to send invitations for this event" });
+      const existingEvent = await storage.getEvent(eventId);
+      if (!existingEvent || existingEvent.hostId !== businessPartner.id) {
+        return res.status(403).json({ message: "Not authorized to view participants for this event" });
       }
       
-      // Format the date for the email
-      const formatEventDate = (startDate: Date, endDate?: Date) => {
-        const startDateStr = format(new Date(startDate), "PPP");
-        const startTimeStr = format(new Date(startDate), "p");
-        
-        if (!endDate) return `${startDateStr} at ${startTimeStr}`;
-        
-        const endDateStr = format(new Date(endDate), "PPP");
-        const endTimeStr = format(new Date(endDate), "p");
-        
-        if (startDateStr === endDateStr) {
-          return `${startDateStr} from ${startTimeStr} to ${endTimeStr}`;
-        } else {
-          return `${startDateStr} at ${startTimeStr} to ${endDateStr} at ${endTimeStr}`;
-        }
-      };
+      // Get event participants
+      const participants = await storage.getEventParticipants(eventId);
       
-      // Generate a URL for the event (frontend would handle this)
-      const eventUrl = `https://flypside.co/events/${event.id}`;
-      
-      // Send email invitation
-      const result = await sendEventInvitation({
-        to: email,
-        from: "invitations@flypside.co",
-        eventName: event.name,
-        eventDate: formatEventDate(event.startDate, event.endDate),
-        eventLocation: event.location || "TBA",
-        eventUrl,
-        personalMessage
-      });
-      
-      if (result.success) {
-        res.json({ message: "Invitation sent successfully" });
-      } else {
-        res.status(500).json({ message: result.message });
-      }
+      res.json(participants);
     } catch (error) {
-      console.error("Error sending invitation:", error);
-      res.status(500).json({ message: "Failed to send invitation", error: String(error) });
+      res.status(500).json({ message: "Failed to fetch event participants" });
     }
   });
-  
+
   // Analytics routes
   app.get("/api/analytics/events", async (req, res) => {
     try {
       const userId = req.user!.id;
+      const { period } = req.query;
       
       // Get business partner for the user
       const businessPartner = await storage.getBusinessPartnerByUserId(userId);
@@ -635,173 +692,205 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Business partner profile not found" });
       }
       
-      // Get all events for the business partner
-      const events = await storage.getEventsByBusinessPartnerId(businessPartner.id, "all");
+      // Calculate date range based on period
+      const now = new Date();
+      let startDate;
       
-      // Calculate metrics
-      const currentDate = new Date();
-      const threeMonthsAgo = subMonths(currentDate, 3);
-      
-      let totalEvents = 0;
-      let pastEvents = 0;
-      let upcomingEvents = 0;
-      let cancelledEvents = 0;
-      let totalParticipants = 0;
-      let totalRevenue = 0;
-      let recentEventSeries = Array(12).fill(0);
-      
-      // Calculate weeks for the past 3 months (approx 12 weeks)
-      const weekDates = [];
-      for (let i = 0; i < 12; i++) {
-        weekDates.push(addDays(threeMonthsAgo, i * 7));
+      if (period === '3months') {
+        startDate = subMonths(now, 3);
+      } else if (period === '6months') {
+        startDate = subMonths(now, 6);
+      } else if (period === 'year') {
+        startDate = subMonths(now, 12);
+      } else {
+        // Default to 1 month
+        startDate = subMonths(now, 1);
       }
       
-      events.forEach(event => {
-        totalEvents++;
-        
-        // Add participants and revenue
-        const participants = event.currentParticipants || 0;
-        totalParticipants += participants;
-        
-        // Add revenue based on participants and price
-        const eventRevenue = participants * event.price;
-        totalRevenue += eventRevenue;
-        
-        // Categorize by status
-        const startDate = new Date(event.startDate);
-        if (event.status === 'cancelled') {
-          cancelledEvents++;
-        } else if (startDate < currentDate) {
-          pastEvents++;
-        } else {
-          upcomingEvents++;
-        }
-        
-        // Add to event series for chart
-        // Find which week this event belongs to
-        for (let i = 0; i < weekDates.length; i++) {
-          if (startDate >= weekDates[i] && (i === weekDates.length - 1 || startDate < weekDates[i + 1])) {
-            recentEventSeries[i]++;
-            break;
-          }
-        }
+      // Preferably do analytics in the database
+      // For now, we'll just return some basic stats
+      const allEvents = await storage.getEventsByBusinessPartnerId(businessPartner.id, 'all');
+      
+      // Filter events within the date range
+      const eventsInPeriod = allEvents.filter(event => {
+        const eventDate = new Date(event.startDate);
+        return eventDate >= startDate && eventDate <= now;
       });
       
-      // Calculate participant rate (average filled capacity)
-      const participantRate = pastEvents > 0 
-        ? (totalParticipants / events.filter(e => new Date(e.startDate) < currentDate)
-            .reduce((sum, event) => sum + event.maxParticipants, 0)) * 100
-        : 0;
+      // Calculate stats
+      const totalEvents = eventsInPeriod.length;
+      const upcomingEvents = allEvents.filter(e => new Date(e.startDate) > now).length;
+      const cancelledEvents = eventsInPeriod.filter(e => e.status === 'cancelled').length;
+      const completedEvents = eventsInPeriod.filter(e => 
+        e.status !== 'cancelled' && new Date(e.endDate) < now
+      ).length;
       
-      // Format revenue based on business partner's preferred currency
-      function getCurrencySymbol(currency: string | null): string {
-        switch(currency) {
-          case 'USD':
-            return '$';
-          case 'EUR':
-            return '€';
-          case 'GBP':
-            return '£';
-          case 'AUD':
-            return 'A$';
-          default:
-            return '₹';
+      // Total participants across all completed events
+      const totalParticipants = eventsInPeriod.reduce((sum, event) => {
+        if (event.currentParticipants && event.status !== 'cancelled') {
+          return sum + event.currentParticipants;
         }
-      }
+        return sum;
+      }, 0);
       
-      // Format week labels for chart
-      const weekLabels = weekDates.map(date => format(date, "MMM d"));
+      // Calculate total revenue (in the event's currency)
+      const revenueByEvent = eventsInPeriod.map(event => {
+        if (event.status !== 'cancelled' && event.price && event.currentParticipants) {
+          return { 
+            currency: event.currency || businessPartner.preferredCurrency || 'INR',
+            amount: event.price * event.currentParticipants
+          };
+        }
+        return null;
+      }).filter(Boolean);
+      
+      // Group revenue by currency
+      const revenueByCurrency = revenueByEvent.reduce((acc, revenue) => {
+        if (revenue) {
+          if (!acc[revenue.currency]) {
+            acc[revenue.currency] = 0;
+          }
+          acc[revenue.currency] += revenue.amount;
+        }
+        return acc;
+      }, {} as Record<string, number>);
+      
+      // Months data for chart
+      const labels = [];
+      const participantsData = [];
+      const revenueData = [];
+      
+      // Create 6 data points (e.g., for the last 6 months)
+      for (let i = 5; i >= 0; i--) {
+        const monthDate = subMonths(now, i);
+        const monthLabel = format(monthDate, 'MMM yyyy');
+        labels.push(monthLabel);
+        
+        const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+        const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+        
+        // Events in this month
+        const monthEvents = eventsInPeriod.filter(event => {
+          const eventDate = new Date(event.startDate);
+          return eventDate >= monthStart && eventDate <= monthEnd && event.status !== 'cancelled';
+        });
+        
+        // Participants in this month
+        const monthParticipants = monthEvents.reduce((sum, event) => {
+          return sum + (event.currentParticipants || 0);
+        }, 0);
+        participantsData.push(monthParticipants);
+        
+        // Revenue in this month (using a default currency for simplicity)
+        const monthRevenue = monthEvents.reduce((sum, event) => {
+          if (event.price && event.currentParticipants) {
+            return sum + event.price * event.currentParticipants;
+          }
+          return sum;
+        }, 0);
+        revenueData.push(monthRevenue);
+      }
       
       res.json({
         totalEvents,
-        pastEvents,
         upcomingEvents,
         cancelledEvents,
+        completedEvents,
         totalParticipants,
-        participantRate: Math.round(participantRate),
-        totalRevenue,
-        currencySymbol: getCurrencySymbol(businessPartner.preferredCurrency),
-        eventSeries: {
-          labels: weekLabels,
-          data: recentEventSeries
-        },
-        events: events.map(event => ({
-          id: event.id,
-          name: event.name,
-          date: format(new Date(event.startDate), "PPP"),
-          participants: event.currentParticipants || 0,
-          maxParticipants: event.maxParticipants,
-          occupancyRate: event.maxParticipants > 0 
-            ? Math.round((event.currentParticipants || 0) / event.maxParticipants * 100) 
-            : 0,
-          revenue: (event.currentParticipants || 0) * event.price,
-          currencySymbol: getCurrencySymbol(event.currency),
-          status: event.status
-        }))
+        revenueByCurrency,
+        chart: {
+          labels,
+          datasets: [
+            {
+              name: 'Participants',
+              data: participantsData
+            },
+            {
+              name: 'Revenue',
+              data: revenueData
+            }
+          ]
+        }
       });
     } catch (error) {
-      console.error("Error fetching analytics:", error);
-      res.status(500).json({ message: "Failed to fetch analytics data", error: String(error) });
+      console.error("Analytics error:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
     }
   });
-  
+
   // Share event via email
   app.post("/api/events/:id/share", async (req, res) => {
     try {
       const eventId = parseInt(req.params.id);
-      const { email, personalMessage } = req.body;
+      const { email, message } = req.body;
+      const userId = req.user!.id;
       
       if (!email) {
-        return res.status(400).json({ message: "Email address is required" });
+        return res.status(400).json({ message: "Recipient email is required" });
+      }
+      
+      // Get business partner for the user
+      const businessPartner = await storage.getBusinessPartnerByUserId(userId);
+      
+      if (!businessPartner) {
+        return res.status(400).json({ message: "Business partner profile not found" });
       }
       
       // Get the event
       const event = await storage.getEvent(eventId);
+      
       if (!event) {
         return res.status(404).json({ message: "Event not found" });
       }
       
-      // Format the date for the email
+      // Format the dates for display
       const formatEventDate = (startDate: Date, endDate?: Date) => {
-        const startDateStr = format(new Date(startDate), "PPP");
-        const startTimeStr = format(new Date(startDate), "p");
-        
-        if (!endDate) return `${startDateStr} at ${startTimeStr}`;
-        
-        const endDateStr = format(new Date(endDate), "PPP");
-        const endTimeStr = format(new Date(endDate), "p");
-        
-        if (startDateStr === endDateStr) {
-          return `${startDateStr} from ${startTimeStr} to ${endTimeStr}`;
-        } else {
-          return `${startDateStr} at ${startTimeStr} to ${endDateStr} at ${endTimeStr}`;
+        const startFormatted = format(new Date(startDate), "MMM d, yyyy h:mm a");
+        if (endDate) {
+          const endFormatted = format(new Date(endDate), "MMM d, yyyy h:mm a");
+          return `${startFormatted} to ${endFormatted}`;
         }
+        return startFormatted;
       };
+
+      const eventDate = formatEventDate(event.startDate, event.endDate);
       
-      // Generate a URL for the event (frontend would handle this)
-      const eventUrl = `https://flypside.co/events/${event.id}`;
-      
-      // Send email invitation
+      // Send the email
       const result = await sendEventInvitation({
         to: email,
-        from: "invitations@flypside.co",
+        from: "noreply@flypside.com", // This should be a verified sender in your SendGrid account
         eventName: event.name,
-        eventDate: formatEventDate(event.startDate, event.endDate),
-        eventLocation: event.location || "TBA",
-        eventUrl,
-        personalMessage
+        hostName: `${businessPartner.firstName} ${businessPartner.lastName}`,
+        eventDate,
+        location: event.location || "Location to be announced",
+        price: event.price ? `${getCurrencySymbol(event.currency)}${event.price}` : "Free",
+        personalMessage: message || "Check out this event I found on Flypside!",
+        eventLink: `${process.env.SITE_URL || "https://flypside.com"}/events/${event.id}`,
+        isShare: true
       });
       
-      if (result.success) {
-        res.json({ message: "Event shared successfully via email" });
-      } else {
-        res.status(500).json({ message: result.message });
-      }
+      res.json({
+        success: result.success,
+        message: result.message
+      });
     } catch (error) {
-      console.error("Error sharing event:", error);
+      console.error("Share event error:", error);
       res.status(500).json({ message: "Failed to share event", error: String(error) });
     }
   });
+
+  // Helper function to get currency symbol
+  function getCurrencySymbol(currency: string | null): string {
+    switch (currency) {
+      case 'USD': return '$';
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'AUD': return 'A$';
+      case 'INR': 
+      default:
+        return '₹';
+    }
+  }
 
   // Create HTTP server
   const httpServer = createServer(app);
