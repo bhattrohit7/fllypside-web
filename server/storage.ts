@@ -617,6 +617,24 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async getEventsByOfferId(offerId: number): Promise<Event[]> {
+    // Find all event-offer mappings for this offer
+    const eventIds = Array.from(this.eventOffers.values())
+      .filter(pair => pair.offerId === offerId)
+      .map(pair => pair.eventId);
+    
+    // Get the events
+    const events: Event[] = [];
+    for (const eventId of eventIds) {
+      const event = await this.getEvent(eventId);
+      if (event) {
+        events.push(event);
+      }
+    }
+    
+    return events;
+  }
+
   // Event participants
   async getEventParticipants(eventId: number): Promise<any[]> {
     return Array.from(this.eventParticipants.values())
@@ -865,6 +883,22 @@ export class DatabaseStorage implements IStorage {
         offerId
       });
     }
+  }
+  
+  async getEventsByOfferId(offerId: number): Promise<Event[]> {
+    // Get all events linked to this offer
+    const linkedEvents = await db
+      .select({
+        event: events
+      })
+      .from(eventOffers)
+      .innerJoin(
+        events,
+        eq(eventOffers.eventId, events.id)
+      )
+      .where(eq(eventOffers.offerId, offerId));
+    
+    return linkedEvents.map(item => item.event);
   }
 
   // Event participants
