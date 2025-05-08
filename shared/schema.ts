@@ -78,6 +78,7 @@ export const businessPartnerInterests = pgTable("business_partner_interests", {
 export const offers = pgTable("offers", {
   id: serial("id").primaryKey(),
   businessPartnerId: integer("business_partner_id").references(() => businessPartners.id, { onDelete: 'cascade' }).notNull(),
+  name: text("name").notNull(), // Added offer name field
   text: text("text").notNull(),
   percentage: integer("percentage").notNull(),
   startDate: timestamp("start_date").notNull(),
@@ -89,6 +90,7 @@ export const offers = pgTable("offers", {
 export const insertOfferSchema = createInsertSchema(offers)
   .omit({ id: true, createdAt: true, updatedAt: true })
   .extend({
+    name: z.string().min(2, "Offer name is required").max(100),
     percentage: z.coerce.number().min(1).max(100),
     startDate: z.coerce.date(),
     expiryDate: z.coerce.date().optional(),

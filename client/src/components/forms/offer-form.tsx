@@ -54,6 +54,7 @@ export default function OfferForm({ onSuccess, existingData }: OfferFormProps) {
     resolver: zodResolver(offerFormSchema),
     defaultValues: {
       businessPartnerId: businessPartner?.id,
+      name: existingData?.name || "",
       text: existingData?.text || "",
       percentage: existingData?.percentage || 10,
       startDate: existingData?.startDate ? new Date(existingData.startDate) : new Date(),
@@ -154,6 +155,26 @@ export default function OfferForm({ onSuccess, existingData }: OfferFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="px-4 py-5 sm:p-6 space-y-6">
             <div className="grid grid-cols-6 gap-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="col-span-6">
+                    <FormLabel>Offer name</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        placeholder="e.g. Early Bird Special"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      A short name to identify this offer in listings
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <FormField
                 control={form.control}
                 name="text"
