@@ -14,7 +14,8 @@ import {
   AlertTriangle,
   Ban,
   HelpCircle,
-  Share2
+  Share2,
+  Tag
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -298,6 +299,18 @@ export default function EventDetailPage() {
                             Free event
                           </span>
                         </div>
+                      )}
+                      
+                      {/* Show attached offer if there is one */}
+                      {event.offerId && (
+                        <Link href={`/offers/${event.offerId}`}>
+                          <div className="mt-4 bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-lg px-4 py-3 inline-flex items-center shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                            <Tag className="h-5 w-5 text-purple-500 mr-2" />
+                            <span className="text-purple-800 font-semibold">
+                              View promotional offer details
+                            </span>
+                          </div>
+                        </Link>
                       )}
 
                       {/* Event Analytics */}
