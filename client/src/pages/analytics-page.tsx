@@ -4,7 +4,7 @@ import MobileMenu from "@/components/layout/mobile-menu";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   LineChart, Line, Legend, PieChart, Pie, Cell
 } from "recharts";
 import { 
@@ -13,6 +13,12 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Tooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger 
+} from "@/components/ui/tooltip";
 
 // Helper function to get currency symbol
 const getCurrencySymbol = (currency?: string): string => {
@@ -89,9 +95,18 @@ export default function AnalyticsPage() {
                               <Users className="h-5 w-5 text-white" />
                             </div>
                             <div className="ml-5 w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-500 truncate">
-                                Total Participants
-                              </p>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <p className="text-sm font-medium text-gray-500 truncate cursor-help">
+                                      Total Participants
+                                    </p>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Total Participants</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                               <p className="text-lg font-medium text-gray-900">
                                 {analyticsData?.participants?.total || 0}
                               </p>
@@ -126,9 +141,18 @@ export default function AnalyticsPage() {
                               <CalendarCheck className="h-5 w-5 text-white" />
                             </div>
                             <div className="ml-5 w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-500 truncate">
-                                Events Completed
-                              </p>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <p className="text-sm font-medium text-gray-500 truncate cursor-help">
+                                      Events Completed
+                                    </p>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Events Completed</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                               <p className="text-lg font-medium text-gray-900">
                                 {analyticsData?.events?.completed || 0}
                               </p>
@@ -163,9 +187,18 @@ export default function AnalyticsPage() {
                               <Tag className="h-5 w-5 text-white" />
                             </div>
                             <div className="ml-5 w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-500 truncate">
-                                Offer Redemptions
-                              </p>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <p className="text-sm font-medium text-gray-500 truncate cursor-help">
+                                      Offer Redemptions
+                                    </p>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Offer Redemptions</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                               <p className="text-lg font-medium text-gray-900">
                                 {analyticsData?.offers?.redemptions || 0}
                               </p>
@@ -200,9 +233,18 @@ export default function AnalyticsPage() {
                               <DollarSign className="h-5 w-5 text-white" />
                             </div>
                             <div className="ml-5 w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-500 truncate">
-                                Total Revenue
-                              </p>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <p className="text-sm font-medium text-gray-500 truncate cursor-help">
+                                      Total Revenue
+                                    </p>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Total Revenue</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                               <p className="text-lg font-medium text-gray-900">
                                 {getCurrencySymbol(analyticsData?.revenue?.currency || businessPartner?.preferredCurrency || 'INR')}{analyticsData?.revenue?.total || 0}
                               </p>
