@@ -7,6 +7,7 @@ import { Link } from "wouter";
 interface OfferCardProps {
   offer: {
     id: number;
+    name: string;
     text: string;
     percentage: number;
     startDate: string;
@@ -33,7 +34,7 @@ export default function OfferCard({ offer }: OfferCardProps) {
       <div className="px-5 py-5">
         <div className="flex justify-between items-start">
           <h3 className="text-lg font-semibold text-gray-900 tracking-tight bg-gradient-to-br from-secondary to-secondary/70 bg-clip-text text-transparent">
-            {offer.text.split(' ')[0]}
+            {offer.name || offer.text.split(' ')[0]}
           </h3>
           <Badge variant={offer.status === 'Active' ? 'default' : 'secondary'} className={
             offer.status === 'Active' 

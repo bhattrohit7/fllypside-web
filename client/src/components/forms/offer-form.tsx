@@ -126,6 +126,7 @@ export default function OfferForm({ onSuccess, existingData }: OfferFormProps) {
     // Create the data object for API submission
     const submitData = {
       businessPartnerId: businessPartner?.id,
+      name: values.name,
       text: values.text,
       percentage: values.percentage,
       startDate: values.startDateOption === "now" 
